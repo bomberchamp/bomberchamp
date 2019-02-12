@@ -4,9 +4,12 @@ RUN apt-get update && apt-get upgrade
 
 RUN pip install -q numpy scipy sklearn
 RUN pip install -q pygame
+RUN pip install -q jupyter
 RUN pip install -q tf-nightly
 
 WORKDIR /wd
+
+EXPOSE 8888
 
 CMD ["python", "main.py"]
 
