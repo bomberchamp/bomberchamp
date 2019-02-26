@@ -17,6 +17,16 @@ choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
 # channels: arena, self, others (3), bombs, explosions, coins -> c = 8 (see get_x)
 c = 8
 
+class replay_buffer():
+    def __init__(self, size = 1000):
+        self.size = size
+        self.buffer = []
+    def add(self, experience):
+        if len(self.buffer)+len(experience)>=self.size:
+            self.buffer=self.buffer[(len(self.buffer)+len(experience))-self.size:]
+        self.buffer.extend(experience)
+    def sample(self,batch_size):
+        return np.reshape(np.array(random.sample(self.buffer, batch_size)),(batch_size,3))
 
 def setup(agent):
     K.clear_session()
@@ -74,6 +84,10 @@ def setup(agent):
     agent.Xs = []
     agent.actions = []
     agent.rewards = []
+    
+    agent.buffer = replay_buffer() #total buffer
+    agent.episode_buffer = replay_buffer() #episode buffer
+
 
     np.random.seed()
 
@@ -102,6 +116,8 @@ def reward_update(agent):
     reward -= 5 * events.count(e.GOT_KILLED)
     reward += 20 * events.count(e.SURVIVED_ROUND)
     agent.reward = reward
+    
+    agent.episode_buffer.add(np.reshape(np.array([agent.X, agent.action_choice, agent.reward]),(1,3)))
 
     agent.Xs.append(agent.X)
     agent.actions.append([agent.action_choice])
@@ -111,7 +127,15 @@ def end_of_episode(agent):
     #model = agent.model
     #model.train_on_batch(x, y, class_weight=None)
     
+    agent.buffer.add(agent.episode_buffer.buffer)
+    agent.episode_buffer=replay_buffer() #clear episode_buffer
+    batch=agent.buffer.sample(10)#get batch to train on random experiences
+    agent.Xs=batch[:,0]
+    agent.actions=batch[:,1]
+    agent.rewards=batch[:,2]
+    
     sess = K.get_session()
+  
     sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs), agent.reward_holder:np.array(agent.rewards),agent.action_holder:np.array(agent.actions)})
     print('End of Episode')
 
