@@ -87,26 +87,26 @@ def setup(agent):
     
     agent.buffer = replay_buffer() #total buffer
     agent.episode_buffer = replay_buffer() #episode buffer
-
+    
+    agent.epsilon=0.1 #for epsilon greedy policy
 
     np.random.seed()
 
 def act(agent):
     # agent.game_state
-    print('Pick action at random')
     X = get_x(agent.game_state)
     agent.X = X
 
     #agent.next_action = np.random.choice(choices, p=[.23, .23, .23, .23, .08, .00])
 
-    pred = agent.model.predict(np.array([X]))
-    agent.action_choice = np.argmax(pred)
-    agent.next_action = choices[agent.action_choice]
-    print("================================")
-    print(agent.next_action)
+    if np.random.rand(1) > agent.epsilon:
+        pred = agent.model.predict(np.array([X]))
+        agent.action_choice = np.argmax(pred)
+        agent.next_action = choices[agent.action_choice]
+    else:
+        agent.next_action = np.random.choice(choices, p=[.23, .23, .23, .23, .08, .00])
 
 def reward_update(agent):
-    print('Update')
     events = agent.events
     reward = 0
     reward += events.count(e.COIN_FOUND)
