@@ -124,7 +124,7 @@ def act(agent):
     
 def reward_update(agent):
     events = agent.events
-    reward = 0
+    reward = -1
     reward += events.count(e.COIN_FOUND)
     reward += events.count(e.COIN_COLLECTED)
     reward += 2 * events.count(e.KILLED_OPPONENT)
@@ -132,8 +132,6 @@ def reward_update(agent):
     reward -= 5 * events.count(e.GOT_KILLED)
     reward += 20 * events.count(e.SURVIVED_ROUND)
     agent.reward = reward
-    print("====================")
-    print(reward)
     
     agent.episode_buffer.add(np.reshape(np.array([agent.X, agent.action_choice, agent.reward]),(1,3)))
     #agent.Xs.append(agent.X)
@@ -148,12 +146,11 @@ def end_of_episode(agent):
     agent.buffer.add(agent.episode_buffer.buffer)
     agent.episode_buffer=replay_buffer() #clear episode_buffer
     batch=agent.buffer.sample(32)#get batch to train on random experiences
-    #print(batch)
+
     agent.Xs=np.array([b for b in batch[:,0]])
     agent.actions=np.array([b for b in batch[:,1]]).reshape((-1, 1))
-    print(agent.actions)
     agent.rewards=np.array([b for b in batch[:,2]]).reshape((-1, 1))
-    print(agent.rewards)
+
     sess = K.get_session()
   
     sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs),  agent.reward_holder:np.array(agent.rewards),agent.action_holder:np.array(agent.actions)}) ##TODO:this part isn't executed, why??
