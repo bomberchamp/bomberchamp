@@ -1,6 +1,7 @@
 
 import numpy as np
 import tensorflow as tf
+import random
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
 from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D
@@ -27,6 +28,18 @@ class replay_buffer():
         self.buffer.extend(experience)
     def sample(self,batch_size):
         return np.reshape(np.array(random.sample(self.buffer, batch_size)),(batch_size,3))
+    
+    
+def delayed_reward(reward, disc_factor):
+    """ function that calculates delayed rewards for given list of rewards and discount_factor."""
+    reward_array=np.array(reward)
+    dela_rew=np.empty_like(reward)
+    storage=0
+    for i in range(len(reward)):
+        j=len(reward)-i-1
+        dela_rew[j]=storage*disc_factor+reward[j]
+        storage = storage+reward[j]
+    return dela_rew
 
 def setup(agent):
     K.clear_session()
@@ -76,7 +89,7 @@ def setup(agent):
 
     
     agent.update = update
-    
+    agent.disc_factor=0.7
     agent.inputs = inputs
     agent.action_holder = action_holder
     agent.reward_holder = reward_holder
@@ -89,6 +102,7 @@ def setup(agent):
     agent.episode_buffer = replay_buffer() #episode buffer
     
     agent.epsilon=0.1 #for epsilon greedy policy
+    agent.steps=0  #to count how many steps have been done so far
 
     np.random.seed()
 
@@ -105,7 +119,7 @@ def act(agent):
         agent.next_action = choices[agent.action_choice]
     else:
         agent.next_action = np.random.choice(choices, p=[.23, .23, .23, .23, .08, .00])
-
+    
 def reward_update(agent):
     events = agent.events
     reward = 0
@@ -118,7 +132,6 @@ def reward_update(agent):
     agent.reward = reward
     
     agent.episode_buffer.add(np.reshape(np.array([agent.X, agent.action_choice, agent.reward]),(1,3)))
-
     agent.Xs.append(agent.X)
     agent.actions.append([agent.action_choice])
     agent.rewards.append([agent.reward])
@@ -126,17 +139,19 @@ def reward_update(agent):
 def end_of_episode(agent):
     #model = agent.model
     #model.train_on_batch(x, y, class_weight=None)
-    
+    agent.episode_buffer.buffer=np.array(agent.episode_buffer.buffer)
+    agent.episode_buffer.buffer[:,2]=delayed_reward(agent.episode_buffer.buffer[:,2],agent.disc_factor)#delayed rewards
     agent.buffer.add(agent.episode_buffer.buffer)
     agent.episode_buffer=replay_buffer() #clear episode_buffer
-    batch=agent.buffer.sample(10)#get batch to train on random experiences
+    batch=agent.buffer.sample(1)#get batch to train on random experiences
     agent.Xs=batch[:,0]
     agent.actions=batch[:,1]
+    print(agent.actions)
     agent.rewards=batch[:,2]
-    
+    print(agent.rewards)
     sess = K.get_session()
   
-    sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs), agent.reward_holder:np.array(agent.rewards),agent.action_holder:np.array(agent.actions)})
+    sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs),  agent.reward_holder:np.array(agent.rewards),agent.action_holder:np.array(agent.actions)}) ##TODO:this part isn't executed, why??
     print('End of Episode')
 
 
