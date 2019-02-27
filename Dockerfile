@@ -1,6 +1,7 @@
 FROM python:latest
 
-RUN apt-get update && apt-get upgrade
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y ffmpeg
 
 RUN pip install -q numpy scipy sklearn
 RUN pip install -q pygame
