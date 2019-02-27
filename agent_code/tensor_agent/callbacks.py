@@ -27,6 +27,8 @@ class replay_buffer():
             self.buffer=self.buffer[(len(self.buffer)+len(experience))-self.size:]
         self.buffer.extend(experience)
     def sample(self,batch_size):
+        if batch_size > len(self.buffer):
+            batch_size = len(self.buffer)
         return np.reshape(np.array(random.sample(self.buffer, batch_size)),(batch_size,3))
     
     
@@ -94,9 +96,9 @@ def setup(agent):
     agent.action_holder = action_holder
     agent.reward_holder = reward_holder
     
-    agent.Xs = []
-    agent.actions = []
-    agent.rewards = []
+    #agent.Xs = []
+    #agent.actions = []
+    #agent.rewards = []
     
     agent.buffer = replay_buffer() #total buffer
     agent.episode_buffer = replay_buffer() #episode buffer
@@ -130,11 +132,13 @@ def reward_update(agent):
     reward -= 5 * events.count(e.GOT_KILLED)
     reward += 20 * events.count(e.SURVIVED_ROUND)
     agent.reward = reward
+    print("====================")
+    print(reward)
     
     agent.episode_buffer.add(np.reshape(np.array([agent.X, agent.action_choice, agent.reward]),(1,3)))
-    agent.Xs.append(agent.X)
-    agent.actions.append([agent.action_choice])
-    agent.rewards.append([agent.reward])
+    #agent.Xs.append(agent.X)
+    #agent.actions.append([agent.action_choice])
+    #agent.rewards.append([agent.reward])
 
 def end_of_episode(agent):
     #model = agent.model
@@ -143,11 +147,12 @@ def end_of_episode(agent):
     agent.episode_buffer.buffer[:,2]=delayed_reward(agent.episode_buffer.buffer[:,2],agent.disc_factor)#delayed rewards
     agent.buffer.add(agent.episode_buffer.buffer)
     agent.episode_buffer=replay_buffer() #clear episode_buffer
-    batch=agent.buffer.sample(1)#get batch to train on random experiences
-    agent.Xs=batch[:,0]
-    agent.actions=batch[:,1]
+    batch=agent.buffer.sample(32)#get batch to train on random experiences
+    #print(batch)
+    agent.Xs=np.array([b for b in batch[:,0]])
+    agent.actions=np.array([b for b in batch[:,1]]).reshape((-1, 1))
     print(agent.actions)
-    agent.rewards=batch[:,2]
+    agent.rewards=np.array([b for b in batch[:,2]]).reshape((-1, 1))
     print(agent.rewards)
     sess = K.get_session()
   
