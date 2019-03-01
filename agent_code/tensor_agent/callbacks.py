@@ -91,9 +91,9 @@ def setup(agent):
     reward_holder = Input(shape=(1,))
     
     # applies a mask to the outputs so that only the prediction for the chosen action is considered
-    responsible_weight = tf.reduce_sum(tf.boolean_mask(pred, tf.one_hot(action_holder, D)[:,0,:]))
+    responsible_weight = tf.gather(pred, action_holder, axis=1)
 
-    loss = - (tf.log(responsible_weight) * reward_holder)
+    loss = - tf.reduce_mean(tf.log(responsible_weight) * reward_holder)
 
     optimizer = tf.train.AdamOptimizer(0.1)
     update = optimizer.minimize(loss)
