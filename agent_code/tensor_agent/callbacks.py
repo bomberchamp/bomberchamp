@@ -19,18 +19,36 @@ choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
 c = 8
 
 class replay_buffer():
-    def __init__(self, size = 1000):
-        self.size = size
-        self.buffer = []
-    def add(self, experience):
-        if len(self.buffer)+len(experience)>=self.size:
-            self.buffer=self.buffer[(len(self.buffer)+len(experience))-self.size:]
-        self.buffer.extend(experience)
-    def sample(self,batch_size):
-        if batch_size > len(self.buffer):
-            batch_size = len(self.buffer)
-        return np.reshape(np.array(random.sample(self.buffer, batch_size)),(batch_size,3))
     
+    def __init__(self, size = 1000, dimension=3):
+        self.size = size
+        self.buffer=[]
+        self.dimension=dimension
+        for i in range(dimension):
+            self.buffer.append([])
+            
+    def add(self, *args):
+        experience = args
+        for i in range(self.dimension):
+            if len(self.buffer[i])+len(experience[i])>=self.size:
+                self.buffer[i]=self.buffer[i][(len(self.buffer[i])+len(experience[i]))-self.size:]
+            self.buffer[i].extend(experience[i])
+            
+    def sample(self,batch_size):
+        indexes=range(len(self.buffer[0]))
+        rand=random.sample(indexes, batch_size)
+        batch=[]
+        for i in range(self.dimension):
+            batch.append([])
+            b = np.array(self.buffer[i])
+            batch[i]=np.array(self.buffer[i])[rand]
+        return batch     
+    
+    def clear(self):
+        self.buffer=[]
+        for i in range(self.dimension):
+            self.buffer.append([])
+        
     
 def delayed_reward(reward, disc_factor):
     """ function that calculates delayed rewards for given list of rewards and discount_factor."""
@@ -96,10 +114,6 @@ def setup(agent):
     agent.action_holder = action_holder
     agent.reward_holder = reward_holder
     
-    #agent.Xs = []
-    #agent.actions = []
-    #agent.rewards = []
-    
     agent.buffer = replay_buffer() #total buffer
     agent.episode_buffer = replay_buffer() #episode buffer
     
@@ -109,11 +123,9 @@ def setup(agent):
     np.random.seed()
 
 def act(agent):
-    # agent.game_state
+    
     X = get_x(agent.game_state)
     agent.X = X
-
-    #agent.next_action = np.random.choice(choices, p=[.23, .23, .23, .23, .08, .00])
 
     if np.random.rand(1) > agent.epsilon:
         pred = agent.model.predict(np.array([X]))
@@ -132,30 +144,22 @@ def reward_update(agent):
     reward -= 5 * events.count(e.GOT_KILLED)
     reward += 20 * events.count(e.SURVIVED_ROUND)
     agent.reward = reward
+    agent.episode_buffer.add([agent.X], [agent.action_choice], [agent.reward])
     
-    agent.episode_buffer.add(np.reshape(np.array([agent.X, agent.action_choice, agent.reward]),(1,3)))
-    #agent.Xs.append(agent.X)
-    #agent.actions.append([agent.action_choice])
-    #agent.rewards.append([agent.reward])
-
 def end_of_episode(agent):
     #model = agent.model
     #model.train_on_batch(x, y, class_weight=None)
-    agent.episode_buffer.buffer=np.array(agent.episode_buffer.buffer)
-    agent.episode_buffer.buffer[:,2]=delayed_reward(agent.episode_buffer.buffer[:,2],agent.disc_factor)#delayed rewards
-    agent.buffer.add(agent.episode_buffer.buffer)
-    agent.episode_buffer=replay_buffer() #clear episode_buffer
-    batch=agent.buffer.sample(32)#get batch to train on random experiences
-
-    agent.Xs=np.array([b for b in batch[:,0]])
-    agent.actions=np.array([b for b in batch[:,1]]).reshape((-1, 1))
-    agent.rewards=np.array([b for b in batch[:,2]]).reshape((-1, 1))
-
+    x, action, reward = agent.episode_buffer.buffer
+    agent.buffer.add(x, action, delayed_reward(reward, agent.disc_factor))
+    agent.episode_buffer.clear() #clear episode_buffer
+    agent.Xs, agent.actions, agent.rewards = agent.buffer.sample(2)
+    #agent.Xs=np.array([b for b in batch[:,0]])
+    #agent.actions=np.array([b for b in batch[:,1]]).reshape((-1, 1))
+    #agent.rewards=np.array([b for b in batch[:,2]]).reshape((-1, 1))
     sess = K.get_session()
   
-    sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs),  agent.reward_holder:np.array(agent.rewards),agent.action_holder:np.array(agent.actions)}) ##TODO:this part isn't executed, why??
-    print('End of Episode')
-
+    sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs),  agent.reward_holder:np.array(agent.rewards)[:,None],agent.action_holder:np.array(agent.actions)[:,None]}) 
+    print('End of episode')
 
 def get_x(game_state):
     arena = game_state['arena']
