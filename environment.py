@@ -410,8 +410,8 @@ class BombeRLeWorld(object):
                     a.ready_flag.wait()
                     a.ready_flag.clear()
             # Penalty for agent who spent most time thinking
+            self.replay['times'] = [a.mean_time for a in self.agents]
             if len(self.agents) > 1:
-                self.replay['times'] = [a.mean_time for a in self.agents]
                 slowest = max(self.agents, key=lambda a: a.mean_time)
                 self.logger.info(f'Agent <{slowest.name}> loses 1 point for being slowest (avg. {slowest.mean_time:.3f}s)')
                 slowest.update_score(s.reward_slow)
