@@ -43,12 +43,12 @@ class NoisyDense(Layer):
         # Fortunado et al. 2017, chapter 3.2
         # https://arxiv.org/pdf/1706.10295.pdf
         #
-        # Initial values can be tuned
+        # sigma_0 is a hyperparameter
         low = -1*1/(input_size ** 0.5)
         high = 1*1/(input_size ** 0.5)
         mu_init = RandomUniform(minval=low,maxval=high)
 
-        sigma_0 = 0.4
+        sigma_0 = 0.5
         sigma_init = Constant(sigma_0/(input_size ** 0.5))
 
 

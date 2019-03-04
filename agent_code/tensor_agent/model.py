@@ -1,6 +1,5 @@
 import numpy as np
 import tensorflow as tf
-import random
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
 from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D, GaussianNoise
@@ -8,20 +7,13 @@ from tensorflow.keras.models import Sequential, Model
 
 from tensorflow.keras import backend as K
 
-from settings import s, e
-
 
 from agent_code.tensor_agent.loss import mean_huber_loss
 from agent_code.tensor_agent.layers import NoisyDense
 
 
-choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
-
-# channels: arena, self, others (3), bombs, explosions, coins -> c = 8 (see get_x)
-c = 8
-
-
 def create_conv_net(shape):
+    # Convolutional part of the network
     inputs = Input(shape=shape)
     x = Conv2D(8, 3, activation='relu', padding="same")(inputs)
     x = MaxPooling2D()(x)
@@ -39,27 +31,26 @@ def create_conv_net(shape):
 
     return inputs, outputs
 
-def create_value(x):
-    v = NoisyDense(64, activation='relu')(x)
-    v = NoisyDense(1, activation=None)(v)
-    return v
-
-def create_advantage(x, D):
-    a = NoisyDense(64, activation='relu')(x)
-    a = NoisyDense(D, activation=None)(a)
-    return a
+def create_stream(x, D):
+    s = NoisyDense(64, activation='relu')(x)
+    s = NoisyDense(D, activation=None)(s)
+    return s
 
 def create_model(shape, D):
-        inputs, x = create_conv_net(shape=shape)
+    # Create the convolutional network
+    inputs, x = create_conv_net(shape=shape)
 
-        v = create_value(x)
-        a = create_advantage(x, D)
+    # Dueling networks:
+    # - Split the model into value stream and advantage stream
+    v = create_stream(x, 1)
+    a = create_stream(x, D)
 
-        outputs = Activation('relu')(v + a - tf.reduce_mean(a))
+    # - Merge streams
+    outputs = Activation('relu')(v + a - tf.reduce_mean(a))
 
-        model = Model(inputs=inputs, outputs=outputs)
+    model = Model(inputs=inputs, outputs=outputs)
 
-        return model, inputs, outputs
+    return model, inputs, outputs
 
 class FullModel:
     def __init__(self, input_shape, D):
@@ -67,6 +58,7 @@ class FullModel:
         #  Define Model
         #========================
 
+        # Define online and target models for Double Q-learning
         self.online, _, _ = create_model(input_shape, D)
         self.target, t_in, t_out = create_model(input_shape, D)
 
