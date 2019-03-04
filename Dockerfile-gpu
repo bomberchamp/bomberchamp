@@ -1,0 +1,47 @@
+FROM nvidia/cuda:10.0-cudnn7-runtime
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Pick up some TF dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-setuptools \
+        libgomp1
+
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN ln -s -f /usr/bin/python3 /usr/bin/python
+RUN ln -s -f /usr/bin/pip3 /usr/bin/python
+
+RUN pip3 --no-cache-dir install \
+        tornado==5.1.1 \
+        tensorflow-gpu \
+        Pillow \
+        h5py \
+        jupyter \
+        keras_applications \
+        keras_preprocessing \
+        matplotlib \
+        numpy \
+        pandas \
+        scipy \
+        sklearn \
+        pygame
+
+# For CUDA profiling, TensorFlow requires CUPTI.
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
+
+# TensorBoard
+EXPOSE 6006
+# IPython
+EXPOSE 8888
+
+RUN mkdir /wd
+
+WORKDIR "/wd"
+
+CMD ["jupyter", "notebook", "--allow-root", "--ip 0.0.0.0"]
+
+# docker run -ti --rm --runtime=nvidia -p 8888:8888 -p 6006:6006 -v $(pwd):/wd tf-test

@@ -3,7 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-.swp
+*.h5
+*.p
+*.swp
 .DS_Store
 
 # C extensions
