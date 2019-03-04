@@ -3,7 +3,7 @@ import tensorflow as tf
 import random
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
-from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D
+from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D, GaussianNoise
 from tensorflow.keras.models import Sequential, Model
 
 from tensorflow.keras import backend as K
@@ -12,12 +12,14 @@ from settings import s, e
 
 
 from agent_code.tensor_agent.loss import mean_huber_loss
+from agent_code.tensor_agent.layers import NoisyDense
 
 
 choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
 
 # channels: arena, self, others (3), bombs, explosions, coins -> c = 8 (see get_x)
 c = 8
+
 
 def create_conv_net(shape):
     inputs = Input(shape=shape)
@@ -38,13 +40,13 @@ def create_conv_net(shape):
     return inputs, outputs
 
 def create_value(x):
-    v = Dense(64, activation='relu')(x)
-    v = Dense(1, activation=None)(v)
+    v = NoisyDense(64, activation='relu')(x)
+    v = NoisyDense(1, activation=None)(v)
     return v
 
 def create_advantage(x, D):
-    a = Dense(64, activation='relu')(x)
-    a = Dense(D, activation=None)(a)
+    a = NoisyDense(64, activation='relu')(x)
+    a = NoisyDense(D, activation=None)(a)
     return a
 
 def create_model(shape, D):
