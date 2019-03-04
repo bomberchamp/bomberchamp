@@ -42,6 +42,6 @@ RUN mkdir /wd
 
 WORKDIR "/wd"
 
-CMD ["/run_jupyter.sh", "--allow-root", "--ip 0.0.0.0"]
+CMD ["jupyter", "notebook", "--allow-root", "--ip 0.0.0.0"]
 
 # docker run -ti --rm --runtime=nvidia -p 8888:8888 -p 6006:6006 -v $(pwd):/wd tf-test
