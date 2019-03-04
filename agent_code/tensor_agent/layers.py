@@ -95,3 +95,17 @@ class NoisyDense(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
+class VAMerge(Layer):
+    def __init__(self, **kwargs):
+        super(VAMerge, self).__init__(**kwargs)
+        self.supports_masking = True
+
+    def call(self, inputs, training=None):
+        v = inputs[0]
+        a = inputs[1]
+        return v + a - K.mean(a)
+
+
+    def compute_output_shape(self, input_shape):
+        return input_shape[1]
+

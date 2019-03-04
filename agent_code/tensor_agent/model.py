@@ -2,14 +2,14 @@ import numpy as np
 import tensorflow as tf
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
-from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D, GaussianNoise
+from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D
 from tensorflow.keras.models import Sequential, Model
 
 from tensorflow.keras import backend as K
 
 
 from agent_code.tensor_agent.loss import mean_huber_loss
-from agent_code.tensor_agent.layers import NoisyDense
+from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 
 
 def create_conv_net(shape):
@@ -46,7 +46,8 @@ def create_model(shape, D):
     a = create_stream(x, D)
 
     # - Merge streams
-    outputs = Activation('relu')(v + a - tf.reduce_mean(a))
+    outputs = VAMerge()([v, a])
+    outputs = Activation('relu')(outputs)
 
     model = Model(inputs=inputs, outputs=outputs)
 
