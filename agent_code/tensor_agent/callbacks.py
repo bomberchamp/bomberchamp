@@ -87,7 +87,7 @@ def setup(agent):
     #training_model.compile(loss=lambda y_true, y_pred: y_pred, optimizer='Adam')
 
     
-    agent.disc_factor=0.7
+    agent.disc_factor=0.9
     
     agent.buffer = replay_buffer() #total buffer
     agent.episode_buffer = replay_buffer() #episode buffer
@@ -111,13 +111,22 @@ def act(agent):
     
 def reward_update(agent):
     events = agent.events
-    reward = -1
-    reward += events.count(e.COIN_FOUND)
-    reward += events.count(e.COIN_COLLECTED)
-    reward += 2 * events.count(e.KILLED_OPPONENT)
-    reward -= 10 * events.count(e.KILLED_SELF)
-    reward -= 5 * events.count(e.GOT_KILLED)
-    reward += 20 * events.count(e.SURVIVED_ROUND)
+    crates_destroyed = events.count(e.CRATE_DESTROYED)
+    coins_found = events.count(e.COIN_FOUND)
+    coins_collected = events.count(e.COIN_COLLECTED)
+    opponents_killed = events.count(e.KILLED_OPPONENT)
+    self_killed = events.count(e.KILLED_SELF)
+    got_killed = events.count(e.GOT_KILLED)
+    survived_round = events.count(e.SURVIVED_ROUND)
+
+
+    # survive
+    reward = -0.1 - got_killed * 100 - self_killed * 100 + 100 * survived_round
+    # collect coins
+    reward += 0.5 * crates_destroyed + 1 * coins_found + 10 * coins_collected
+    # kill opponents
+    reward += 100 * opponents_killed
+
     agent.reward = reward
     agent.episode_buffer.add([agent.X], [agent.action_choice], [agent.reward])
     
