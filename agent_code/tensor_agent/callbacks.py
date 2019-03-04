@@ -11,7 +11,7 @@ from tensorflow.keras import backend as K
 
 from settings import s, e
 
-
+from agent_code.tensor_agent.model import FullModel
 
 choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
 
@@ -69,34 +69,13 @@ def setup(agent):
     #========================
     #  Define Model
     #========================
+
+    D = len(choices)
+    input_shape = (s.cols, s.rows, c)
+
+    model = FullModel(input_shape, D)
     
-    inputs = Input(shape=(s.cols, s.rows, c))
-    x = Conv2D(16, 3)(inputs)
-    x = Flatten()(x)
-    x = Dense(64, activation='relu')(x)
-    x = Dense(64, activation='relu')(x)
-    pred = Dense(D, activation='softmax')(x)
-
-    model = Model(inputs=inputs, outputs=pred)
-    #model.compile(loss="hinge", optimizer="adam")
-
     agent.model = model
-
-    
-    #========================
-    #  Define Training Update
-    #========================
-
-    action_holder = Input(shape=(1,), dtype='int32')  # in j=0,...,D-1
-    reward_holder = Input(shape=(1,))
-    
-    # applies a mask to the outputs so that only the prediction for the chosen action is considered
-    responsible_weight = tf.gather(pred, action_holder, axis=1)
-
-    loss = - tf.reduce_mean(tf.log(responsible_weight) * reward_holder)
-
-    optimizer = tf.train.AdamOptimizer(0.1)
-    update = optimizer.minimize(loss)
     
     
     # Initialize all variables
@@ -108,11 +87,7 @@ def setup(agent):
     #training_model.compile(loss=lambda y_true, y_pred: y_pred, optimizer='Adam')
 
     
-    agent.update = update
     agent.disc_factor=0.7
-    agent.inputs = inputs
-    agent.action_holder = action_holder
-    agent.reward_holder = reward_holder
     
     agent.buffer = replay_buffer() #total buffer
     agent.episode_buffer = replay_buffer() #episode buffer
@@ -128,7 +103,7 @@ def act(agent):
     agent.X = X
 
     if np.random.rand(1) > agent.epsilon:
-        pred = agent.model.predict(np.array([X]))
+        pred = agent.model.online.predict(np.array([X]))
         agent.action_choice = np.argmax(pred)
         agent.next_action = choices[agent.action_choice]
     else:
@@ -156,9 +131,12 @@ def end_of_episode(agent):
     #agent.Xs=np.array([b for b in batch[:,0]])
     #agent.actions=np.array([b for b in batch[:,1]]).reshape((-1, 1))
     #agent.rewards=np.array([b for b in batch[:,2]]).reshape((-1, 1))
-    sess = K.get_session()
-  
-    sess.run([agent.update], feed_dict={agent.inputs: np.array(agent.Xs),  agent.reward_holder:np.array(agent.rewards)[:,None],agent.action_holder:np.array(agent.actions)[:,None]}) 
+
+    agent.model.update( \
+        inputs = np.array(agent.Xs), \
+        actions = np.array(agent.actions)[:,None], \
+        rewards = np.array(agent.rewards)[:,None])
+
     print('End of episode')
 
 def get_x(game_state):
