@@ -58,13 +58,13 @@ class NoisyDense(Layer):
         # According to formula
         # y = (b + Wx) + (b_sigma * b_epsilon + (W_sigma * W_epsilon)x)
         # => y = (b + b_sigma * b_epsilon) + (W + W_sigma * W_epsilon)x
-        w_mu = self.add_weight(shape=(input_size, output_size), initializer=mu_init)
-        w_sigma = self.add_weight(shape=(input_size, output_size), initializer=sigma_init)
+        w_mu = self.add_weight(shape=(input_size, output_size), initializer=mu_init, name='w_mu')
+        w_sigma = self.add_weight(shape=(input_size, output_size), initializer=sigma_init, name='w_sigma')
 
         self.w = w_mu + w_sigma * w_epsilon
 
-        b_mu = self.add_weight(shape=(output_size,), initializer=mu_init)
-        b_sigma = self.add_weight(shape=(output_size,), initializer=sigma_init)
+        b_mu = self.add_weight(shape=(output_size,), initializer=mu_init, name='b_mu')
+        b_sigma = self.add_weight(shape=(output_size,), initializer=sigma_init, name='b_sigma')
 
         self.b = b_mu + b_sigma * b_epsilon
         
