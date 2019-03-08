@@ -106,3 +106,10 @@ class FullModel:
 
     def update_online(self):
         self.online.set_weights(self.target.get_weights())
+
+    def save_model(self, file='my_model.h5'):
+        self.target.save_model(file)
+
+    def load_weights(self, file='my_model.h5'):
+        self.online.load_weights(file, custom_objects={'VAMerge': VAMerge, 'NoisyDense': NoisyDense})
+        self.target.load_weights(file, custom_objects={'VAMerge': VAMerge, 'NoisyDense': NoisyDense})
