@@ -56,6 +56,7 @@ def setup(agent):
 
     
     agent.disc_factor=0.9
+    agent.n_step = 3
     
     agent.buffer=PER_buffer(agent.model.buffer_size,0.5,0.1,0.1,0.1)   #(buffer_size, PER_a, PER_b, PER_e, anneal)
     agent.epsilon=0.1 #for epsilon greedy policy
@@ -84,7 +85,7 @@ def act(agent):
 def end_of_episode(agent):
     #model = agent.model
     #model.train_on_batch(x, y, class_weight=None)
-    agent.rewards=delayed_reward(agent.rewards,agent.disc_factor)
+    #agent.rewards=delayed_reward(agent.rewards,agent.disc_factor)
     for i in range(len(agent.actions)):
         agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
     if np.min(agent.buffer.tree.tree[-agent.buffer.tree.capacity:])>0:
@@ -152,6 +153,30 @@ def reward_update(agent):
     reward += 100 * opponents_killed
 
     agent.reward = reward
-    agent.rewards.append(reward)
+
+
+    # ====
+    # Multi-step learning
+    # ====
+
+    print(len(agent.rewards))
+
+
+    if (len(agent.rewards) >= agent.n_step):
+        computed_v = agent.model.target.predict(np.array([agent.X]))
+        r = agent.rewards[0] + np.max(computed_v)
+        agent.buffer.add([agent.Xs[0]], [agent.actions[0]], [r])
+
+        agent.rewards = agent.rewards[1:]
+        agent.actions = agent.actions[1:]
+        agent.Xs = agent.Xs[1:]
+
+
+    agent.rewards.append(0)
     agent.actions.append(agent.action_choice)
     agent.Xs.append(agent.X)
+
+    # add gamma**0 to gamma**(n-1) times the reward to the appropriate rewards
+    for i in range(len(agent.rewards)):
+        agent.rewards[-i] += reward * agent.disc_factor ** i
+
