@@ -85,7 +85,6 @@ class PER_buffer(object):
         minibatch=[]
         idxs = np.ones((k,), dtype=np.int32)
         weights = np.ones((k, 1))
-        
         #to normalize the weights, the maximal weight needs to be calculated
         max_weight=1/(k*np.min(self.tree.tree[-self.tree.capacity:]))**self.PER_b
         
@@ -104,11 +103,10 @@ class PER_buffer(object):
         return idxs, minibatch, weights
     
     def update(self, idxs, errors):
-        ''' It is important to use data idx here, not tree '''
+        ''' It is important to use tree idx here, not tree '''
         
         priorities=errors+self.PER_e
         priorities=np.minimum(priorities, self.default_max_p)
         pri_a=priorities**self.PER_a   #modified priority that is actually used
-        #idxs+=self.capacity-1
         for i, p in zip(idxs, pri_a):
             self.tree.update(i, p)

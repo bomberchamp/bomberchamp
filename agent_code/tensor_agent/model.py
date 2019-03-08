@@ -83,7 +83,7 @@ class FullModel:
         self.errors=tf.abs(reward_holder-responsible_weight)
         self.responsible_weight = responsible_weight
         self.t_out = t_out
-        self.buffer_size=10
+        self.buffer_size=100
         self.input_ph = t_in
         self.action_ph = action_holder
         self.reward_ph = reward_holder

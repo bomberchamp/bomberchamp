@@ -64,16 +64,6 @@ def setup(agent):
     agent.Xs=[]
     agent.actions=[]
     np.random.seed()
-   # fill_memory(agent)
-    #print('setup')
-    
-#def fill_memory(agent):
- #   X = get_x(agent.game_state)
-  #  agent.X = X
-   # agent.next_action = np.random.choice(choices, p=[.23, .23, .23, .23, .08, .00])
-    #reward_update(agent)
-    #print('fill memory')
-        
 
 
 def act(agent):
@@ -81,13 +71,14 @@ def act(agent):
     X = get_x(agent.game_state)
     agent.X = X
 
-    if np.random.rand(1) > agent.epsilon:
+    if  np.random.rand(1) > agent.epsilon:
         pred = agent.model.online.predict(np.array([X]))
         agent.action_choice = np.argmax(pred)
         agent.next_action = choices[agent.action_choice]
     else:
-        agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.23, .23, .23, .23, .08, .00])
+        agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.03, .03, .03, .03, .88, .00])
         agent.next_action = choices[agent.action_choice]
+    agent.steps+=1
     
     
 def end_of_episode(agent):
@@ -96,19 +87,18 @@ def end_of_episode(agent):
     agent.rewards=delayed_reward(agent.rewards,agent.disc_factor)
     for i in range(len(agent.actions)):
         agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
-    
-    agent.idxs, minibatch, weights = agent.buffer.sample(2)
-    agent.Xs = np.concatenate(np.array([each[0] for each in minibatch]))
-    agent.actions = np.concatenate(np.array([each[1] for each in minibatch]))
-    agent.rewards = np.concatenate(np.array([each[2] for each in minibatch]))
-    weight=weights
-    errors = agent.model.update( \
-        inputs = agent.Xs, \
-        actions = agent.actions[:,None], \
-        rewards = agent.rewards[:,None], \
-        per_weights = weight)
-    
-    agent.buffer.update(agent.idxs, errors)
+    if np.min(agent.buffer.tree.tree[-agent.buffer.tree.capacity:])>0:
+        agent.idxs, minibatch, weights = agent.buffer.sample(2)
+        agent.Xs = np.concatenate(np.array([each[0] for each in minibatch]))
+        agent.actions = np.concatenate(np.array([each[1] for each in minibatch]))
+        agent.rewards = np.concatenate(np.array([each[2] for each in minibatch]))
+        errors = agent.model.update( \
+            inputs = agent.Xs, \
+            actions = agent.actions[:,None], \
+            rewards = agent.rewards[:,None], \
+            per_weights = weights)
+
+        agent.buffer.update(agent.idxs, errors)
 
     agent.rewards=[]
     agent.Xs=[]
@@ -165,8 +155,3 @@ def reward_update(agent):
     agent.rewards.append(reward)
     agent.actions.append(agent.action_choice)
     agent.Xs.append(agent.X)
-    
-    
-
-
-
