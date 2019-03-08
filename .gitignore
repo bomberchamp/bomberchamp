@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.tfevents.*
 *.h5
 *.p
 *.swp

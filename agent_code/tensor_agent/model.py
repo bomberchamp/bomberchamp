@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
+import time
+
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
 from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D
 from tensorflow.keras.models import Sequential, Model
@@ -77,8 +79,16 @@ class FullModel:
         
         hl = huber_loss(reward_holder, responsible_weight, max_grad=1.)
         loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
+        tf.summary.scalar('loss', loss)
+
         optimizer = tf.train.AdamOptimizer(0.1)
         update = optimizer.minimize(loss)
+
+        merged_summary = tf.summary.merge_all()
+
+        self.summary = merged_summary
+        self.train_writer = tf.summary.FileWriter(f'tf-board/train/{time.time()}',
+                                      K.get_session().graph)
         
         self.errors=tf.abs(reward_holder-responsible_weight)
         self.responsible_weight = responsible_weight
@@ -90,18 +100,22 @@ class FullModel:
         self.update_op = update
         self.idxs=idx_holder
         self.weights = weight_holder
+
+        self.steps = 0
         
         self.hl = hl
 
 
     def update(self, inputs, actions, rewards, per_weights):
         sess = K.get_session()
-        _, errors, rw, t_out = sess.run([self.update_op, self.errors, self.responsible_weight, self.t_out], feed_dict={
+        _, errors, rw, t_out, summary = sess.run([self.update_op, self.errors, self.responsible_weight, self.t_out, self.summary], feed_dict={
             self.input_ph: inputs,
             self.action_ph:actions,
             self.reward_ph:rewards,
             self.weights:per_weights
         })
+        self.train_writer.add_summary(summary, self.steps)
+        self.steps += 1
         return errors
 
     def update_online(self):

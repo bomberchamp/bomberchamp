@@ -45,6 +45,7 @@ def setup(agent):
     model = FullModel(input_shape, D)
     agent.model = model
     
+    agent.model.load_weights('tensor_agent-model.h5')
     
     # Initialize all variables
     init_op = tf.global_variables_initializer()
@@ -57,9 +58,10 @@ def setup(agent):
     
     agent.disc_factor=0.9
     agent.n_step = 3
+    agent.target_network_period = 3000
     
     agent.buffer=PER_buffer(agent.model.buffer_size,0.5,0.1,0.1,0.1)   #(buffer_size, PER_a, PER_b, PER_e, anneal)
-    agent.epsilon=0.1 #for epsilon greedy policy
+    agent.epsilon=0.4 #for epsilon greedy policy
     agent.steps=0  #to count how many steps have been done so far
     agent.rewards=[]
     agent.Xs=[]
@@ -75,12 +77,15 @@ def act(agent):
     if  np.random.rand(1) > agent.epsilon:
         pred = agent.model.online.predict(np.array([X]))
         agent.action_choice = np.argmax(pred)
+        #if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
+        #    agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.25, .25, .25, .25, .00, .00])
         agent.next_action = choices[agent.action_choice]
     else:
-        agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.03, .03, .03, .03, .88, .00])
+        #agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.25, .25, .25, .25, .00, .00]) # coins
+        agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.23, .23, .23, .23, .08, .00])
         agent.next_action = choices[agent.action_choice]
     agent.steps+=1
-    
+        
     
 def end_of_episode(agent):
     #model = agent.model
@@ -88,22 +93,13 @@ def end_of_episode(agent):
     #agent.rewards=delayed_reward(agent.rewards,agent.disc_factor)
     for i in range(len(agent.actions)):
         agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
-    if np.min(agent.buffer.tree.tree[-agent.buffer.tree.capacity:])>0:
-        agent.idxs, minibatch, weights = agent.buffer.sample(2)
-        agent.Xs = np.concatenate(np.array([each[0] for each in minibatch]))
-        agent.actions = np.concatenate(np.array([each[1] for each in minibatch]))
-        agent.rewards = np.concatenate(np.array([each[2] for each in minibatch]))
-        errors = agent.model.update( \
-            inputs = agent.Xs, \
-            actions = agent.actions[:,None], \
-            rewards = agent.rewards[:,None], \
-            per_weights = weights)
-
-        agent.buffer.update(agent.idxs, errors)
 
     agent.rewards=[]
     agent.Xs=[]
     agent.actions=[]
+
+    agent.model.save('tensor_agent-model.h5')
+    print(f'End of episode. Steps: {agent.steps}')
     
     
 def get_x(game_state):
@@ -146,7 +142,7 @@ def reward_update(agent):
 
 
     # survive
-    reward = -0.1 - got_killed * 100 - self_killed * 100 + 100 * survived_round
+    reward = -0.1 - got_killed * 100 - self_killed * 100 #+ 100 * survived_round
     # collect coins
     reward += 0.5 * crates_destroyed + 1 * coins_found + 10 * coins_collected
     # kill opponents
@@ -158,8 +154,6 @@ def reward_update(agent):
     # ====
     # Multi-step learning
     # ====
-
-    print(len(agent.rewards))
 
 
     if (len(agent.rewards) >= agent.n_step):
@@ -179,4 +173,22 @@ def reward_update(agent):
     # add gamma**0 to gamma**(n-1) times the reward to the appropriate rewards
     for i in range(len(agent.rewards)):
         agent.rewards[-i] += reward * agent.disc_factor ** i
+
+    if agent.steps % agent.target_network_period == 0:
+        agent.model.update_online()
+
+
+    if agent.steps % 10 == 0 and np.min(agent.buffer.tree.tree[-agent.buffer.tree.capacity:])>0:
+        idxs, minibatch, weights = agent.buffer.sample(2)
+        Xs = np.concatenate(np.array([each[0] for each in minibatch]))
+        actions = np.concatenate(np.array([each[1] for each in minibatch]))
+        rewards = np.concatenate(np.array([each[2] for each in minibatch]))
+        errors = agent.model.update( \
+            inputs = Xs, \
+            actions = actions[:,None], \
+            rewards = rewards[:,None], \
+            per_weights = weights)
+
+        agent.buffer.update(idxs, errors)
+
 
