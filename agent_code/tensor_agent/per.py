@@ -14,9 +14,6 @@ class SumTree(object):
         
     def update(self, index, priority):
         old_priority=self.tree[index]
-        print(priority)
-        print(index)
-        print(self.tree.shape)
         self.tree[index]=priority
         
         #update upper parent nodes
@@ -110,10 +107,8 @@ class PER_buffer(object):
         ''' It is important to use data idx here, not tree '''
         
         priorities=errors+self.PER_e
-        print(type(errors),type(self.default_max_p))
         priorities=np.minimum(priorities, self.default_max_p)
         pri_a=priorities**self.PER_a   #modified priority that is actually used
         #idxs+=self.capacity-1
-        print(idxs.shape, errors.shape)
         for i, p in zip(idxs, pri_a):
             self.tree.update(i, p)

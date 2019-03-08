@@ -96,28 +96,23 @@ def end_of_episode(agent):
     agent.rewards=delayed_reward(agent.rewards,agent.disc_factor)
     for i in range(len(agent.actions)):
         agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
-    print('changes')
     
     agent.idxs, minibatch, weights = agent.buffer.sample(2)
     agent.Xs = np.concatenate(np.array([each[0] for each in minibatch]))
     agent.actions = np.concatenate(np.array([each[1] for each in minibatch]))
     agent.rewards = np.concatenate(np.array([each[2] for each in minibatch]))
     weight=weights
-    print(agent.Xs.shape, agent.actions[:,None].shape, agent.rewards[:,None].shape, weight.shape)
     errors = agent.model.update( \
         inputs = agent.Xs, \
         actions = agent.actions[:,None], \
         rewards = agent.rewards[:,None], \
         per_weights = weight)
-    print('updated model')
     
     agent.buffer.update(agent.idxs, errors)
 
     agent.rewards=[]
     agent.Xs=[]
     agent.actions=[]
-    
-    print('End of episode')
     
     
 def get_x(game_state):

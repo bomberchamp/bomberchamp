@@ -95,17 +95,13 @@ class FullModel:
 
 
     def update(self, inputs, actions, rewards, per_weights):
-        print('begin update')
         sess = K.get_session()
-        print(per_weights.shape, self.weights)
         _, errors, rw, t_out = sess.run([self.update_op, self.errors, self.responsible_weight, self.t_out], feed_dict={
             self.input_ph: inputs,
             self.action_ph:actions,
             self.reward_ph:rewards,
             self.weights:per_weights
         })
-        print('rw', rw.shape, t_out.shape)
-        print('end update')
         return errors
 
     def update_online(self):
