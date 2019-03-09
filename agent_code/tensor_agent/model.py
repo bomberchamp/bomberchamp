@@ -81,7 +81,7 @@ class FullModel:
         loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
         tf.summary.scalar('loss', loss)
 
-        optimizer = tf.train.AdamOptimizer(0.1)
+        optimizer = tf.train.AdamOptimizer(0.00001)
         update = optimizer.minimize(loss)
 
         merged_summary = tf.summary.merge_all()

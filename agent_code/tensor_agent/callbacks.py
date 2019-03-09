@@ -45,7 +45,7 @@ def setup(agent):
     model = FullModel(input_shape, D)
     agent.model = model
     
-    agent.model.load_weights('tensor_agent-model.h5')
+    #agent.model.load_weights('tensor_agent-model.h5')
     
     # Initialize all variables
     init_op = tf.global_variables_initializer()
@@ -68,6 +68,33 @@ def setup(agent):
     agent.actions=[]
     np.random.seed()
 
+def filter_invalid(game_state, p):
+    # choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
+    valid = np.ones((6))
+    x, y, _, b, _ = game_state['self']
+    arena = game_state['arena']
+    if not tile_is_free(x, y-1, game_state):
+        valid[2] = 0 # UP invalid
+    if not tile_is_free(x, y+1, game_state):
+        valid[3] = 0 # DOWN invalid
+    if not tile_is_free(x-1, y, game_state):
+        valid[1] = 0 # LEFT invalid
+    if not tile_is_free(x+1, y, game_state):
+        valid[0] = 0 # RIGHT invalid
+    if b <= 0:
+        valid[4] = 0
+
+    valid[4] = 0
+    x = valid * p
+    return np.exp(x) / np.sum(np.exp(x), axis=0)
+
+def tile_is_free(x, y, game_state):
+    is_free = game_state['arena'][x,y] == 0
+    if is_free:
+        for obstacle in game_state['bombs']:
+            o_x, o_y, _ = obstacle
+            is_free = is_free and (o_x != x or o_y != y)
+    return is_free
 
 def act(agent):
     
@@ -76,13 +103,16 @@ def act(agent):
 
     if  np.random.rand(1) > agent.epsilon:
         pred = agent.model.online.predict(np.array([X]))
-        agent.action_choice = np.argmax(pred)
-        #if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
-        #    agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.25, .25, .25, .25, .00, .00])
+        agent.action_choice = np.argmax(filter_invalid(agent.game_state, pred[0]))
+        if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
+            agent.action_choice = 5
+            #agent.action_choice = np.random.choice(np.arange(len(choices)), p=filter_invalid(agent.game_state, [.23, .23, .23, .23, .00, .08]))
         agent.next_action = choices[agent.action_choice]
     else:
-        #agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.25, .25, .25, .25, .00, .00]) # coins
-        agent.action_choice = np.random.choice(np.arange(len(choices)), p=[.23, .23, .23, .23, .08, .00])
+        agent.action_choice = np.random.choice(np.arange(len(choices)), p=filter_invalid(agent.game_state, [.23, .23, .23, .23, .00, .08])) # coins
+        #agent.action_choice = np.random.choice(np.arange(len(choices)), p=filter_invalid(agent.game_state, [.23, .23, .23, .23, .08, .00]))
+        if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
+            agent.action_choice = 5
         agent.next_action = choices[agent.action_choice]
     agent.steps+=1
         
@@ -142,11 +172,11 @@ def reward_update(agent):
 
 
     # survive
-    reward = -0.1 - got_killed * 100 - self_killed * 100 #+ 100 * survived_round
+    reward = -0.1 - got_killed * s.reward_kill - self_killed * s.reward_kill #+ 100 * survived_round
     # collect coins
-    reward += 0.5 * crates_destroyed + 1 * coins_found + 10 * coins_collected
+    reward += 0.1 * crates_destroyed + 0.5 * coins_found + s.reward_coin * coins_collected
     # kill opponents
-    reward += 100 * opponents_killed
+    reward += s.reward_kill * opponents_killed
 
     agent.reward = reward
 
