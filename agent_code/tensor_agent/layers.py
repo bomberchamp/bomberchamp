@@ -9,12 +9,13 @@ from tensorflow.keras import activations
 # https://arxiv.org/pdf/1710.02298.pdf
 # https://arxiv.org/pdf/1706.10295.pdf
 class NoisyDense(Layer):
-    def __init__(self, output_dim, activation=None, **kwargs):
+    def __init__(self, output_dim, activation=None, sigma_0=0.5, **kwargs):
         super(NoisyDense, self).__init__(**kwargs)
         self.supports_masking = True
 
         self.output_dim = output_dim
         self.activation = activations.get(activation)
+        self.sigma_0 = sigma_0
 
     def build(self, input_shape):
         input_size = int(input_shape[-1])
@@ -48,8 +49,7 @@ class NoisyDense(Layer):
         high = 1*1/(input_size ** 0.5)
         mu_init = RandomUniform(minval=low,maxval=high)
 
-        sigma_0 = 0.5
-        sigma_init = Constant(sigma_0/(input_size ** 0.5))
+        sigma_init = Constant(self.sigma_0/(input_size ** 0.5))
 
 
         #========================

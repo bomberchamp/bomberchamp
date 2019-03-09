@@ -9,6 +9,7 @@ from tensorflow.keras.models import Sequential, Model
 
 from tensorflow.keras import backend as K
 
+from agent_code.tensor_agent.hyperparameters import hp
 
 from agent_code.tensor_agent.loss import weighted_huber_loss, huber_loss
 from agent_code.tensor_agent.layers import NoisyDense, VAMerge
@@ -72,16 +73,14 @@ class FullModel:
         action_holder = Input(shape=(1,), dtype='int32')  # in j=0,...,D-1
         reward_holder = Input(shape=(1,))
         weight_holder = Input(shape=(1,))
-        idx_holder = Input(shape=(1,))
         
         # applies a mask to the outputs so that only the prediction for the chosen action is considered
         responsible_weight = tf.batch_gather(t_out, action_holder)
         
-        hl = huber_loss(reward_holder, responsible_weight, max_grad=1.)
         loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
         tf.summary.scalar('loss', loss)
 
-        optimizer = tf.train.AdamOptimizer(0.00001)
+        optimizer = tf.train.AdamOptimizer(hp.learning_rate, epsilon=hp.adam_epsilon)
         update = optimizer.minimize(loss)
 
         merged_summary = tf.summary.merge_all()
@@ -91,24 +90,18 @@ class FullModel:
                                       K.get_session().graph)
         
         self.errors=tf.abs(reward_holder-responsible_weight)
-        self.responsible_weight = responsible_weight
-        self.t_out = t_out
-        self.buffer_size=100
         self.input_ph = t_in
         self.action_ph = action_holder
         self.reward_ph = reward_holder
         self.update_op = update
-        self.idxs=idx_holder
         self.weights = weight_holder
 
         self.steps = 0
-        
-        self.hl = hl
 
 
     def update(self, inputs, actions, rewards, per_weights):
         sess = K.get_session()
-        _, errors, rw, t_out, summary = sess.run([self.update_op, self.errors, self.responsible_weight, self.t_out, self.summary], feed_dict={
+        _, errors, summary = sess.run([self.update_op, self.errors, self.summary], feed_dict={
             self.input_ph: inputs,
             self.action_ph:actions,
             self.reward_ph:rewards,

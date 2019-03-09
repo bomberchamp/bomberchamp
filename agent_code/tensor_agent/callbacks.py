@@ -11,6 +11,8 @@ from tensorflow.keras import backend as K
 
 from settings import s, e
 
+from agent_code.tensor_agent.hyperparameters import hp
+
 from agent_code.tensor_agent.model import FullModel
 from agent_code.tensor_agent.per import PER_buffer
 
@@ -45,7 +47,7 @@ def setup(agent):
     model = FullModel(input_shape, D)
     agent.model = model
     
-    #agent.model.load_weights('tensor_agent-model.h5')
+    agent.model.load_weights('tensor_agent-model.h5')
     
     # Initialize all variables
     init_op = tf.global_variables_initializer()
@@ -54,15 +56,10 @@ def setup(agent):
     # the alternative Keras way:
     #training_model = Model(inputs=[inputs, action_holder, reward_holder], outputs=loss)
     #training_model.compile(loss=lambda y_true, y_pred: y_pred, optimizer='Adam')
-
     
-    agent.disc_factor=0.9
-    agent.n_step = 3
-    agent.target_network_period = 3000
-    
-    agent.buffer=PER_buffer(agent.model.buffer_size,0.5,0.1,0.1,0.1)   #(buffer_size, PER_a, PER_b, PER_e, anneal)
-    agent.epsilon=0.4 #for epsilon greedy policy
+    agent.buffer=PER_buffer(hp.buffer_size,0.5,0.1,0.1,0.1)   #(hp.buffer_size, PER_a, PER_b, PER_e, anneal)
     agent.steps=0  #to count how many steps have been done so far
+
     agent.rewards=[]
     agent.Xs=[]
     agent.actions=[]
@@ -101,7 +98,7 @@ def act(agent):
     X = get_x(agent.game_state)
     agent.X = X
 
-    if  np.random.rand(1) > agent.epsilon:
+    if  np.random.rand(1) > hp.epsilon:
         pred = agent.model.online.predict(np.array([X]))
         agent.action_choice = np.argmax(filter_invalid(agent.game_state, pred[0]))
         if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
@@ -120,7 +117,7 @@ def act(agent):
 def end_of_episode(agent):
     #model = agent.model
     #model.train_on_batch(x, y, class_weight=None)
-    #agent.rewards=delayed_reward(agent.rewards,agent.disc_factor)
+    #agent.rewards=delayed_reward(agent.rewards,hp.discount_factor)
     for i in range(len(agent.actions)):
         agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
 
@@ -186,7 +183,7 @@ def reward_update(agent):
     # ====
 
 
-    if (len(agent.rewards) >= agent.n_step):
+    if (len(agent.rewards) >= hp.multi_step_n):
         computed_v = agent.model.target.predict(np.array([agent.X]))
         r = agent.rewards[0] + np.max(computed_v)
         agent.buffer.add([agent.Xs[0]], [agent.actions[0]], [r])
@@ -202,9 +199,9 @@ def reward_update(agent):
 
     # add gamma**0 to gamma**(n-1) times the reward to the appropriate rewards
     for i in range(len(agent.rewards)):
-        agent.rewards[-i] += reward * agent.disc_factor ** i
+        agent.rewards[-i] += reward * hp.discount_factor ** i
 
-    if agent.steps % agent.target_network_period == 0:
+    if agent.steps % hp.target_network_period == 0:
         agent.model.update_online()
 
 
