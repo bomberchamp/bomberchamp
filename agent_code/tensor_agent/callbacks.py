@@ -47,7 +47,7 @@ def setup(agent):
     model = FullModel(input_shape, D)
     agent.model = model
     
-    agent.model.load_weights('tensor_agent-model.h5')
+    #agent.model.load_weights('tensor_agent-model.h5')
     
     # Initialize all variables
     init_op = tf.global_variables_initializer()
@@ -56,7 +56,6 @@ def setup(agent):
     # the alternative Keras way:
     #training_model = Model(inputs=[inputs, action_holder, reward_holder], outputs=loss)
     #training_model.compile(loss=lambda y_true, y_pred: y_pred, optimizer='Adam')
-    
     agent.buffer=PER_buffer(hp.buffer_size,0.5,0.1,0.1,0.1)   #(hp.buffer_size, PER_a, PER_b, PER_e, anneal)
     agent.steps=0  #to count how many steps have been done so far
 
@@ -112,6 +111,11 @@ def act(agent):
             agent.action_choice = 5
         agent.next_action = choices[agent.action_choice]
     agent.steps+=1
+    
+
+actionslr=[1,0,2,3,4,5]
+actionsud=[0,1,3,2,4,5]
+actionsudlr=[1,0,3,2,4,5]
         
     
 def end_of_episode(agent):
@@ -120,7 +124,11 @@ def end_of_episode(agent):
     #agent.rewards=delayed_reward(agent.rewards,hp.discount_factor)
     for i in range(len(agent.actions)):
         agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
-
+        #data augmentation
+        agent.buffer.add([np.fliplr(agent.Xs[i])], [actionslr[agent.actions[i]]], [agent.rewards[i]])
+        agent.buffer.add([np.flipud(agent.Xs[i])], [actionsud[agent.actions[i]]], [agent.rewards[i]])
+        agent.buffer.add([np.fliplr(np.flipud(agent.Xs[i]))], [actionsudlr[agent.actions[i]]], [agent.rewards[i]])
+        
     agent.rewards=[]
     agent.Xs=[]
     agent.actions=[]
@@ -187,10 +195,27 @@ def reward_update(agent):
         computed_v = agent.model.target.predict(np.array([agent.X]))
         r = agent.rewards[0] + np.max(computed_v)
         agent.buffer.add([agent.Xs[0]], [agent.actions[0]], [r])
+        
+        # ===
+        # Data Augmentation
+        # ===
+        Xlr=np.fliplr(agent.Xs[0])
+        alr=actionslr[agent.actions[0]]
+        agent.buffer.add([Xlr],[alr],[r])
+        
+        
+        Xud=np.flipud(agent.Xs[0])
+        aud=actionsud[agent.actions[0]]
+        agent.buffer.add([Xud],[aud],[r])
+        
+        Xudlr=np.fliplr(Xud)
+        audlr=actionsudrl[agent.actions[0]]
+        agent.buffer.add([Xudlr],[audlr],[r])
 
         agent.rewards = agent.rewards[1:]
         agent.actions = agent.actions[1:]
         agent.Xs = agent.Xs[1:]
+    
 
 
     agent.rewards.append(0)
@@ -217,5 +242,4 @@ def reward_update(agent):
             per_weights = weights)
 
         agent.buffer.update(idxs, errors)
-
 
