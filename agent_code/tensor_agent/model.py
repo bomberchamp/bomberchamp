@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 import time
+from copy import copy
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
 from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D
@@ -58,6 +59,9 @@ def create_model(shape, D):
 
 class FullModel:
     def __init__(self, input_shape, D):
+        self.input_shape = input_shape
+        self.D = D
+
         #========================
         #  Define Model
         #========================
@@ -120,3 +124,10 @@ class FullModel:
     def load_weights(self, file='my_model.h5'):
         self.online.load_weights(file)
         self.target.load_weights(file)
+
+    def clone(self, share_online=True):
+        clone = copy(self)
+        if not share_online:
+            clone.online, _, _ = create_model(input_shape, D)
+
+        return clone
