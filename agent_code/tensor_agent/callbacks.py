@@ -12,14 +12,12 @@ from tensorflow.keras import backend as K
 from settings import s, e
 
 from agent_code.tensor_agent.hyperparameters import hp
+from agent_code.tensor_agent.X import RelativeX2 as game_state_X
 
 from agent_code.tensor_agent.model import FullModel
 from agent_code.tensor_agent.per import PER_buffer
 
 choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
-
-# channels: arena, self, others (3), bombs, explosions, coins -> c = 8 (see get_x)
-c = 8
 
 def delayed_reward(reward, disc_factor):
     """ function that calculates delayed rewards for given list of rewards and discount_factor."""
@@ -43,8 +41,7 @@ def setup(agent):
     #========================
 
     D = len(choices)
-    input_shape = (s.cols, s.rows, c)
-    model = FullModel(input_shape, D)
+    model = FullModel(game_state_X.shape, D)
     agent.model = model
     
     #agent.model.load_weights('tensor_agent-model.h5')
@@ -94,7 +91,7 @@ def tile_is_free(x, y, game_state):
 
 def act(agent):
     
-    X = get_x(agent.game_state)
+    X = game_state_X.get(agent.game_state)
     agent.X = X
 
     if  np.random.rand(1) > hp.epsilon:
@@ -136,34 +133,6 @@ def end_of_episode(agent):
     agent.model.save('tensor_agent-model.h5')
     print(f'End of episode. Steps: {agent.steps}')
     
-    
-def get_x(game_state):
-    arena = game_state['arena']
-    self = game_state['self']
-    others = game_state['others']
-    bombs = game_state['bombs']
-    explosions = game_state['explosions']
-    coins = game_state['coins']
-    # channels: arena, self, others (3), bombs, explosions, coins -> c = 8
-    X = np.zeros((s.cols, s.rows, c))
-    
-    
-    X[:,:,0] = arena
-    
-    X[self[0],self[1],1] = self[3]
-    
-    for i in range(len(others)):
-        X[others[i][0], others[i][1], i+2] = others[i][3]
-    
-    for i in range(len(bombs)):
-        X[bombs[i][0], bombs[i][1], 5] = bombs[i][2]
-    
-    X[:,:,6] = explosions
-    
-    for i in range(len(coins)):
-        X[coins[i][0], coins[i][1], 7] = 1
-
-    return X
 
 def reward_update(agent):
     events = agent.events
