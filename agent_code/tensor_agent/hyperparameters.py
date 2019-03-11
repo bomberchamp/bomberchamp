@@ -11,4 +11,8 @@ class Hyperparameters:
         self.learning_rate = 0.00001
         self.adam_epsilon = 1.5e-4
 
+        self.update_frequency = 4 # update every x frames
+
+        self.peaceful = False # No bombs
+
 hp = Hyperparameters()

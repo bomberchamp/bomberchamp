@@ -1,11 +1,5 @@
 
 import numpy as np
-import tensorflow as tf
-import random
-
-from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
-from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D
-from tensorflow.keras.models import Sequential, Model
 
 from tensorflow.keras import backend as K
 
@@ -14,8 +8,7 @@ from settings import s, e
 from agent_code.tensor_agent.hyperparameters import hp
 from agent_code.tensor_agent.X import RelativeX2 as game_state_X
 
-from agent_code.tensor_agent.model import FullModel
-from agent_code.tensor_agent.per import PER_buffer
+from agent_code.tensor_agent.agent import TensorAgent
 
 choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
 
@@ -30,38 +23,8 @@ def delayed_reward(reward, disc_factor):
         storage = storage+reward[j]
     return dela_rew
 
-def setup(agent):
 
-    K.clear_session()
-    
-    D = len(choices)
-    
-    #========================
-    #  Define Model
-    #========================
-
-    D = len(choices)
-    model = FullModel(game_state_X.shape, D)
-    agent.model = model
-    
-    #agent.model.load_weights('tensor_agent-model.h5')
-    
-    # Initialize all variables
-    init_op = tf.global_variables_initializer()
-    K.get_session().run(init_op)
-
-    # the alternative Keras way:
-    #training_model = Model(inputs=[inputs, action_holder, reward_holder], outputs=loss)
-    #training_model.compile(loss=lambda y_true, y_pred: y_pred, optimizer='Adam')
-    agent.buffer=PER_buffer(hp.buffer_size,0.5,0.1,0.1,0.1)   #(hp.buffer_size, PER_a, PER_b, PER_e, anneal)
-    agent.steps=0  #to count how many steps have been done so far
-
-    agent.rewards=[]
-    agent.Xs=[]
-    agent.actions=[]
-    np.random.seed()
-
-def filter_invalid(game_state, p):
+def get_valid_actions(game_state):
     # choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
     valid = np.ones((6))
     x, y, _, b, _ = game_state['self']
@@ -77,9 +40,7 @@ def filter_invalid(game_state, p):
     if b <= 0:
         valid[4] = 0
 
-    valid[4] = 0
-    x = valid * p
-    return np.exp(x) / np.sum(np.exp(x), axis=0)
+    return valid
 
 def tile_is_free(x, y, game_state):
     is_free = game_state['arena'][x,y] == 0
@@ -89,53 +50,40 @@ def tile_is_free(x, y, game_state):
             is_free = is_free and (o_x != x or o_y != y)
     return is_free
 
-def act(agent):
-    
-    X = game_state_X.get(agent.game_state)
-    agent.X = X
 
-    if  np.random.rand(1) > hp.epsilon:
-        pred = agent.model.online.predict(np.array([X]))
-        agent.action_choice = np.argmax(filter_invalid(agent.game_state, pred[0]))
-        if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
-            agent.action_choice = 5
-            #agent.action_choice = np.random.choice(np.arange(len(choices)), p=filter_invalid(agent.game_state, [.23, .23, .23, .23, .00, .08]))
-        agent.next_action = choices[agent.action_choice]
-    else:
-        agent.action_choice = np.random.choice(np.arange(len(choices)), p=filter_invalid(agent.game_state, [.23, .23, .23, .23, .00, .08])) # coins
-        #agent.action_choice = np.random.choice(np.arange(len(choices)), p=filter_invalid(agent.game_state, [.23, .23, .23, .23, .08, .00]))
-        if (choices[agent.action_choice] == 'BOMB'): # for collecting coins
-            agent.action_choice = 5
-        agent.next_action = choices[agent.action_choice]
-    agent.steps+=1
-    
 
-actionslr=[1,0,2,3,4,5]
-actionsud=[0,1,3,2,4,5]
-actionsudlr=[1,0,3,2,4,5]
+
+def setup(self):
+
+    K.clear_session()
+    
+    D = len(choices)
+    
+    self.ta = TensorAgent(game_state_X.shape, D, weights=None)
+
+
+def act(self):
+    train = self.game_state['train']
+
+    X = game_state_X.get(self.game_state)
+    self.X = X
+
+    valid_actions = get_valid_actions(self.game_state)
+
+    self.action_choice = self.ta.act(X, train=train, valid_actions=valid_actions, p=[0.23, 0.23, 0.23, 0.23, 0., 0.8])
+
+    if hp.peaceful and choices[self.action_choice] == 'BOMB':
+        self.action_choice = 5
+
+    self.next_action = choices[self.action_choice]
         
     
-def end_of_episode(agent):
-    #model = agent.model
-    #model.train_on_batch(x, y, class_weight=None)
-    #agent.rewards=delayed_reward(agent.rewards,hp.discount_factor)
-    for i in range(len(agent.actions)):
-        agent.buffer.add([agent.Xs[i]], [agent.actions[i]], [agent.rewards[i]])
-        #data augmentation
-        agent.buffer.add([np.fliplr(agent.Xs[i])], [actionslr[agent.actions[i]]], [agent.rewards[i]])
-        agent.buffer.add([np.flipud(agent.Xs[i])], [actionsud[agent.actions[i]]], [agent.rewards[i]])
-        agent.buffer.add([np.fliplr(np.flipud(agent.Xs[i]))], [actionsudlr[agent.actions[i]]], [agent.rewards[i]])
-        
-    agent.rewards=[]
-    agent.Xs=[]
-    agent.actions=[]
-
-    agent.model.save('tensor_agent-model.h5')
-    print(f'End of episode. Steps: {agent.steps}')
+def end_of_episode(self):
+    self.ta.end_of_episode()
     
 
-def reward_update(agent):
-    events = agent.events
+def reward_update(self):
+    events = self.events
     crates_destroyed = events.count(e.CRATE_DESTROYED)
     coins_found = events.count(e.COIN_FOUND)
     coins_collected = events.count(e.COIN_COLLECTED)
@@ -152,63 +100,6 @@ def reward_update(agent):
     # kill opponents
     reward += s.reward_kill * opponents_killed
 
-    agent.reward = reward
+    self.reward = reward
 
-
-    # ====
-    # Multi-step learning
-    # ====
-
-
-    if (len(agent.rewards) >= hp.multi_step_n):
-        computed_v = agent.model.target.predict(np.array([agent.X]))
-        r = agent.rewards[0] + np.max(computed_v)
-        agent.buffer.add([agent.Xs[0]], [agent.actions[0]], [r])
-        
-        # ===
-        # Data Augmentation
-        # ===
-        Xlr=np.fliplr(agent.Xs[0])
-        alr=actionslr[agent.actions[0]]
-        agent.buffer.add([Xlr],[alr],[r])
-        
-        
-        Xud=np.flipud(agent.Xs[0])
-        aud=actionsud[agent.actions[0]]
-        agent.buffer.add([Xud],[aud],[r])
-        
-        Xudlr=np.fliplr(Xud)
-        audlr=actionsudrl[agent.actions[0]]
-        agent.buffer.add([Xudlr],[audlr],[r])
-
-        agent.rewards = agent.rewards[1:]
-        agent.actions = agent.actions[1:]
-        agent.Xs = agent.Xs[1:]
-    
-
-
-    agent.rewards.append(0)
-    agent.actions.append(agent.action_choice)
-    agent.Xs.append(agent.X)
-
-    # add gamma**0 to gamma**(n-1) times the reward to the appropriate rewards
-    for i in range(len(agent.rewards)):
-        agent.rewards[-i] += reward * hp.discount_factor ** i
-
-    if agent.steps % hp.target_network_period == 0:
-        agent.model.update_online()
-
-
-    if agent.steps % 10 == 0 and np.min(agent.buffer.tree.tree[-agent.buffer.tree.capacity:])>0:
-        idxs, minibatch, weights = agent.buffer.sample(2)
-        Xs = np.concatenate(np.array([each[0] for each in minibatch]))
-        actions = np.concatenate(np.array([each[1] for each in minibatch]))
-        rewards = np.concatenate(np.array([each[2] for each in minibatch]))
-        errors = agent.model.update( \
-            inputs = Xs, \
-            actions = actions[:,None], \
-            rewards = rewards[:,None], \
-            per_weights = weights)
-
-        agent.buffer.update(idxs, errors)
-
+    self.ta.reward_update([self.X, self.action_choice, self.reward])
