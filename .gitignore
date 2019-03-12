@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.tar.gz
+id_rsa*
 *.tfevents.*
 *.h5
 *.p

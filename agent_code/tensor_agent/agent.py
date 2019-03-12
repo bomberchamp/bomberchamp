@@ -114,7 +114,7 @@ class TensorAgent:
             if p is not None and valid_actions is not None:
                 p = softmax(valid_actions * p)
 
-            action_choice = np.random.choice(np.arange(len(choices)), p=p)
+            action_choice = np.random.choice(np.arange(self.D), p=p)
         else:
             pred = self.model.online.predict(np.array([X]))[0]
             if valid_actions is not None:
@@ -158,9 +158,9 @@ class TensorAgent:
 
         if self.steps % hp.update_frequency == 0 and np.min(self.buffer.tree.tree[-self.buffer.tree.capacity:])>0:
             idxs, minibatch, weights = self.buffer.sample(2)
-            Xs = np.concatenate(np.array([each[0] for each in minibatch]))
-            actions = np.concatenate(np.array([each[1] for each in minibatch]))
-            rewards = np.concatenate(np.array([each[2] for each in minibatch]))
+            Xs = (np.array([each[0] for each in minibatch]))
+            actions = (np.array([each[1] for each in minibatch]))
+            rewards = (np.array([each[2] for each in minibatch]))
             errors = self.model.update( \
                 inputs = Xs, \
                 actions = actions[:,None], \
@@ -174,7 +174,7 @@ class TensorAgent:
         Xs, actions, rewards = self.ms_buffer.clear()
         for i in range(len(actions)):
             for X_, action_ in augment(Xs[i], actions[i]):
-                self.buffer.add([X_], [action_], [rewards[i]])
+                self.buffer.add(X_, action_, rewards[i])
 
         if save is not None:
             self.model.save(save)

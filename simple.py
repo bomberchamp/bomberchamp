@@ -2,6 +2,10 @@ from settings import s, e
 import numpy as np
 import pickle
 
+import random
+
+from copy import copy
+
 ##TODO get times for every step and use mean for computation of reward slow
 
 class expl():
@@ -74,14 +78,6 @@ def explosion_spread_xy(x, y):
     return elements
 
 
-def tile_is_free(x, y, arena, bombs, active_agents):
-    is_free = (arena[x,y] == 0 and bombs[x,y] < 1)
-    if is_free:
-        for a in active_agents:
-            a_x, a_y, _, _, _ = a
-            is_free = is_free and (a_x != x or a_y != y)
-    return is_free
-
 def get_x(arena, self, others, bombs, explosions, coins):
     X = np.zeros((s.cols, s.rows, 6))
     
@@ -110,89 +106,157 @@ def play_replay(replay):
     coins = np.zeros(arena.shape)
     coinlist = replay['coins']
 
-    agents = [a for a in replay['agents']]
+    agents = [(x, y, name, bombs_left, 0) for x, y, name, bombs_left in replay['agents']]
     permutations = replay['permutations']
     actions = replay['actions']
 
     for i in range(len(coinlist)):
         coins[coinlist[i][0], coinlist[i][1]] = 1
 
-    bombs = np.zeros(arena.shape)
-   
-    explosions = np.zeros(arena.shape)
-    
     Xs = []
     action_y_map = {action: i for (i, action) in enumerate(s.actions)}
     ys = []
 
-    bombs_at=np.array([set(),set(),set(),set()])
-    explosions_at=np.array([set(),set(),set(),set()])
-    exp=[]
-    agent_number=dict()
-    keep_score=dict()
-    for k, agent in zip(range(len(agents)),agents):
-        a, b, name, c, d = agent
-        agent_number[k]=name
-        keep_score[name]=0
-        
-        
+    game = Game(arena, coins, agents)
+    
     for i in range(replay['n_steps']):
         permutation = permutations[i]
-        
-        # Agents
-        for j in range(len(agents)):
-            agent = agents[permutation[j]]
-            x, y, name, bombs_left, score = agent
-            action = actions[name][i]
+        agent_actions = {}
 
-            X = get_x(arena, agent, [a for a in agents if a != agent], bombs, explosions, coins)
-            Xs.append(X)
-            ys.append(action_y_map[action])
+        for agent in game.agents:
+            _, _, name, _, _ = agent
+            agent_actions[name] = actions[name][i]
+
+            Xs.append(get_x(*game.get_state(agent)))
+            ys.append(action_y_map[agent_actions[name]])
+
+
+        game.step(agent_actions, permutation)
+
+        
+    print(game.score)
+    #return Xs, ys
+
+
+class Game:
+    def __init__(self, arena, coins, agents):
+        self.arena = np.copy(arena)
+        self.coins = np.copy(coins)
+        self.agents = copy(agents)
+
+        self.bombs = np.zeros(arena.shape)
+       
+        self.explosions = np.zeros(arena.shape)
+
+        self.explosions_at=np.array([set(),set(),set(),set()])
+        self.exp=[]
+        self.score=dict()
+
+        for agent in agents:
+            _, _, name, _, _ = agent
+            self.score[name]=0
+
+        self.steps = 0
+        self.terminated = False
+
+    @staticmethod
+    def create_arena(agent_names):
+        # Arena with wall and crate layout
+        arena = (np.random.rand(s.cols, s.rows) < s.crate_density).astype(int)
+        arena[:1, :] = -1
+        arena[-1:,:] = -1
+        arena[:, :1] = -1
+        arena[:,-1:] = -1
+        for x in range(s.cols):
+            for y in range(s.rows):
+                if (x+1)*(y+1) % 2 == 1:
+                    arena[x,y] = -1
+
+        # Starting positions
+        start_positions = [(1,1), (1,s.rows-2), (s.cols-2,1), (s.cols-2,s.rows-2)]
+        random.shuffle(start_positions)
+        for (x,y) in start_positions:
+            for (xx,yy) in [(x,y), (x-1,y), (x+1,y), (x,y-1), (x,y+1)]:
+                if arena[xx,yy] == 1:
+                    arena[xx,yy] = 0
+
+        # Distribute coins evenly
+        coins = np.zeros(arena.shape)
+
+
+        for i in range(3):
+            for j in range(3):
+                n_crates = (arena[1+5*i:6+5*i, 1+5*j:6+5*j] == 1).sum()
+                while True:
+                    x, y = np.random.randint(1+5*i,6+5*i), np.random.randint(1+5*j,6+5*j)
+                    if (n_crates == 0 and arena[x,y] == 0) or arena[x,y] == 1:
+                        coins[x,y] = 1
+                        break
+
+        # Distribute starting positions
+        agents = []
+        for name in agent_names:
+            x, y = start_positions.pop()
+            agents.append((x, y, name, 1, 0))
+
+        return [arena, coins, agents]
+
+    def step(self, agent_actions, permutation=None):
+        self.steps += 1
+
+        if permutation is None:
+            permutation = np.random.permutation(len(self.agents))
+
+        # Agents
+        for j in range(len(self.agents)):
+            agent = self.agents[permutation[j]]
+            x, y, name, bombs_left, score = agent
+            action = agent_actions[name]
 
                     
             if action == 'BOMB' and bombs_left > 0:
-                bombs[x, y] = s.bomb_timer + 2
+                self.bombs[x, y] = s.bomb_timer + 2
                 bombs_left = -s.bomb_timer + 2
-                exp.append(expl(agent,explosion_spread_xy(x,y),(x,y)))
-            if action == 'DOWN' and tile_is_free(x, y+1, arena, bombs, agents):
+                self.exp.append(expl(agent,explosion_spread_xy(x,y),(x,y)))
+            if action == 'DOWN' and self.tile_is_free(x, y+1):
                 y += 1
-            if action == 'UP' and tile_is_free(x, y-1, arena, bombs, agents):
+            if action == 'UP' and self.tile_is_free(x, y-1):
                 y -= 1
-            if action == 'RIGHT' and tile_is_free(x+1, y, arena, bombs, agents):
+            if action == 'RIGHT' and self.tile_is_free(x+1, y):
                 x += 1
-            if action == 'LEFT' and tile_is_free(x-1, y, arena, bombs, agents):
+            if action == 'LEFT' and self.tile_is_free(x-1, y):
                 x -= 1
             
             bombs_left = np.minimum(bombs_left+1, 1)
             
-            agents[permutation[j]] = (x, y, name, bombs_left, score)
+            self.agents[permutation[j]] = (x, y, name, bombs_left, score)
 
         
-        for j in range(len(agents)):
-            x, y, name, bombs_left, score = agents[j]
-            if coins[x,y]==1:
-                keep_score[name]+=s.reward_coin
-            coins[x,y]=0
+        for j in range(len(self.agents)):
+            x, y, name, bombs_left, score = self.agents[j]
+            if self.coins[x,y]==1:
+                self.score[name]+=s.reward_coin
+            self.coins[x,y]=0
         
             
         
             
         
         # Bombs
-        explosions = np.maximum(explosions, explosion_spread(bombs))
+        self.explosions = np.maximum(self.explosions, explosion_spread(self.bombs))
         
-        bombs = np.maximum(np.zeros(bombs.shape), bombs-1)
+        self.bombs = np.maximum(np.zeros(self.bombs.shape), self.bombs-1)
         
         # Explosions
-        arena[explosions > 1] = 0
+        self.arena[self.explosions > 1] = 0
         agents_hit = set()
-        for j in range(len(agents)):
-            x, y, name, bombs_left, score = agents[j]
-            if explosions[x, y] > 1:
-                print(f"agent {agents[j]} was bombed at {x}, {y} in step {i}")
+        for j in range(len(self.agents)):
+            x, y, name, bombs_left, score = self.agents[j]
+            if self.explosions[x, y] > 1:
+                print(f"agent {self.agents[j]} was bombed at {x}, {y} in step {self.steps}")
                 owners=[]
                 dists=[]
-                for e in exp:
+                for e in self.exp:
                     if (x,y) in e.coords and e.timer<=0:
                         owners.append(e)
                         dists.append(e.dist((x,y)))
@@ -203,28 +267,49 @@ def play_replay(replay):
                 a, b, name_k, c, d = killer
                 if name_k!=name:
                     print('bombed by', name_k)
-                    keep_score[name_k]+=s.reward_kill
+                    self.score[name_k]+=s.reward_kill
                 else:
                     print('suicide')
-                agents_hit.add(agents[j])
+                agents_hit.add(self.agents[j])
     
-            for a in range(len(arena)):
-                for b in range(len(arena)):
-                    if explosions[a,b]>1:
-                        explosions_at[j].discard((a,b))
-        explosions = np.maximum(np.zeros(explosions.shape), explosions-1)
+            for a in range(len(self.arena)):
+                for b in range(len(self.arena)):
+                    if self.explosions[a,b]>1:
+                        self.explosions_at[j].discard((a,b))
+
+        self.explosions = np.maximum(np.zeros(self.explosions.shape), self.explosions-1)
         
         for a in agents_hit:
-            agents.remove(a)
-        for e in exp:
+            self.agents.remove(a)
+        for e in self.exp:
             e.timer-=1
             if e.timer<=-3:
-                exp.remove(e)
-            
-            
-            
-    #reward for slowest agent
-    keep_score[agent_number[np.argmax(np.array(replay['times']))]]+=s.reward_slow  #TODO
+                self.exp.remove(e)
 
-    print(keep_score)
-    #return Xs, ys
+        if len(self.agents) == 0 or self.steps >= 400:
+            self.terminated = True
+
+
+    def get_state(self, agent):
+        # deprecated, but still used by replay
+        return [self.arena, agent, [a for a in self.agents if a != agent], self.bombs, self.explosions, self.coins]
+
+    def get_game_state(self, agent):
+        # mimics format of original framework
+        return {
+            'step': self.step,
+            'arena': self.arena,
+            'self': agent,
+            'others': [a for a in self.agents if a != agent],
+            'bombs': np.concatenate([np.stack(np.where(self.bombs >= 1)),[self.bombs[self.bombs >= 1] - 1]]).T,
+            'explosions': self.explosions,
+            'coins': np.array(np.where(self.coins == 1)).T
+        }
+
+    def tile_is_free(self, x, y):
+        is_free = (self.arena[x,y] == 0 and self.bombs[x,y] < 1)
+        if is_free:
+            for a in self.agents:
+                a_x, a_y, _, _, _ = a
+                is_free = is_free and (a_x != x or a_y != y)
+        return is_free
