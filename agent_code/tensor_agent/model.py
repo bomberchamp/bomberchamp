@@ -27,8 +27,8 @@ def create_conv_net(shape):
 
 def create_stream(x, D):
     
-    s = Dense(512, activation='relu')(x)
-    s = Dense(D, activation=None)(s)
+    s = NoisyDense(512, activation='relu')(x)
+    s = NoisyDense(D, activation=None)(s)
     return s
 
 def create_model(shape, D):

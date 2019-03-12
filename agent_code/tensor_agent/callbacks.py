@@ -6,7 +6,7 @@ from tensorflow.keras import backend as K
 from settings import s, e
 
 from agent_code.tensor_agent.hyperparameters import hp
-from agent_code.tensor_agent.X import RelativeX2 as game_state_X
+from agent_code.tensor_agent.X import Minimal as game_state_X
 
 from agent_code.tensor_agent.agent import TensorAgent
 
