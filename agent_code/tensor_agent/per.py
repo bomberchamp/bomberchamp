@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from agent_code.tensor_agent.hyperparameters import hp
+
 class SumTree(object):
     def __init__(self, capacity): #initalize tree and data with only zeros
         
@@ -57,15 +59,11 @@ class SumTree(object):
             
 class PER_buffer(object):
     
-    def __init__(self, capacity, PER_a, PER_b, PER_e, anneal):
+    def __init__(self, capacity):
     
         self.capacity=capacity   
         self.tree=SumTree(capacity)
         self.default_max_p=1.
-        self.PER_a=PER_a  #Hyperparameter to introduce randomness in PER from 0to1
-        self.PER_b=PER_b  #Hyperparameter to scale influence of weight needs to be annealed during lerning
-        self.anneal=anneal #annealing factor for PER_b
-        self.PER_e=PER_e      #constant to insure that priority never gets zero
         
     def add(self, *args):
         experience = args
@@ -86,7 +84,7 @@ class PER_buffer(object):
         idxs = np.ones((k,), dtype=np.int32)
         weights = np.ones((k, 1))
         #to normalize the weights, the maximal weight needs to be calculated
-        max_weight=1/(k*np.min(self.tree.tree[-self.tree.capacity:]))**self.PER_b
+        max_weight=1/(k*np.min(self.tree.tree[-self.tree.capacity:]))**hp.PER_b
         
         for i in range(k):
             lower_bound = priority_range*i
@@ -97,16 +95,16 @@ class PER_buffer(object):
             leave_index, value_priority, value_data = self.tree.get_leave(value)
             idxs[i]=leave_index            
             prob_weight=value_priority/self.tree.total_priority
-            weights[i,0]=(1/(k*prob_weight)**self.PER_b)/max_weight
+            weights[i,0]=(1/(k*prob_weight)**hp.PER_b)/max_weight
             minibatch.append(value_data)
-        self.PER_b=np.minimum(1., self.PER_b+self.anneal)
+        hp.PER_b=np.minimum(1., hp.PER_b+hp.PER_anneal)
         return idxs, minibatch, weights
     
     def update(self, idxs, errors):
         ''' It is important to use tree idx here, not tree '''
         
-        priorities=errors+self.PER_e
-        priorities=np.minimum(priorities, self.default_max_p)  ##to get samples with higher rewards prioritized we need to pick instances with bigger reward. Stored in value_data[2]. Maybe add this to errors+self.PER_e??
-        pri_a=priorities**self.PER_a   #modified priority that is actually used
+        priorities=errors+hp.PER_e
+        priorities=np.minimum(priorities, self.default_max_p)
+        pri_a=priorities**hp.PER_a   #modified priority that is actually used
         for i, p in zip(idxs, pri_a):
             self.tree.update(i, p)

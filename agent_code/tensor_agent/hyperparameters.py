@@ -11,6 +11,10 @@ class Hyperparameters:
         self.learning_rate = 0.00001
         self.adam_epsilon = 1.5e-4
 
+        self.PER_a = 0.5
+        self.PER_b = 0.4
+        self.PER_anneal = (1. - 0.4) / 100000
+        self.PER_e = 1e-8
         self.update_frequency = 4 # update every x frames
 
         self.peaceful = False # No bombs

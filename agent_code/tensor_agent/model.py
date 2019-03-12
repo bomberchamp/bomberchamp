@@ -19,25 +19,16 @@ from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 def create_conv_net(shape):
     # Convolutional part of the network
     inputs = Input(shape=shape)
-    x = Conv2D(8, 3, activation='relu', padding="same")(inputs)
-    x = MaxPooling2D()(x)
-    x = Conv2D(16, 3, activation='relu', padding="same")(x)
-    x = MaxPooling2D()(x)
-    x = Conv2D(32, 3, activation='relu', padding="same")(x)
-    x = MaxPooling2D()(x)
-    x = Conv2D(32, 3, activation='relu', padding="same")(x)
-    x = MaxPooling2D()(x)
-    x = Conv2D(32, 3, activation='relu', padding="same")(x)
-    x = Dropout(0.3)(x)
-    x = Conv2D(64, 3, activation='relu', padding="same")(x)
-    x = Dropout(0.3)(x)
+    x = Conv2D(32, 8, strides=(4,4), activation='relu', padding="same")(inputs)
+    x = Conv2D(64, 4, strides=(2,2), activation='relu', padding="same")(x)
+    x = Conv2D(64, 3, strides=(1,1), activation='relu', padding="same")(x)
     outputs = Flatten()(x)
 
     return inputs, outputs
 
 def create_stream(x, D):
     
-    s = NoisyDense(64, activation='relu')(x)
+    s = NoisyDense(512, activation='relu')(x)
     s = NoisyDense(D, activation=None)(s)
     return s
 
@@ -52,7 +43,7 @@ def create_model(shape, D):
     a = create_stream(x, D)
     # - Merge streams
     outputs = VAMerge()([v, a])
-    outputs = Activation('relu')(outputs)
+    #outputs = Activation('relu')(outputs)
 
     model = Model(inputs=inputs, outputs=outputs)
     return model, inputs, outputs
