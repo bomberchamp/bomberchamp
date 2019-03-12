@@ -1,0 +1,33 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,left=1cm,right=1cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{caption}
+\title{Machine Learning: Final project bomberchamp}
+\date{today}
+\begin{document}
+
+\section{Training process}
+Using neural networks for training of our bomberman agent, we decided to implement Rainbow (without distributional). For this technique, a number of improvements in deep learning is combined to form an integrated agent. First of all we started with Q-learning.
+The $Q_\pi$ value is computed by choosing an action a for a given state s and calculating all of the future rewards $R_n$ under a given policy $\pi$.
+Hereby future rewards are scaled by a discount factor $\gamma$ to increase the weight of the immediate rewards.
+
+\begin{equation}
+Q_\pi(s,a)= E\left[\sum_{n=1}^{\infty} \gamma^{n-1}R_n^n\right] \Bigg|_{a,s,\pi}
+\end{equation}
+
+The optimal Q-values are then determined by taking the maximum of all $Q_\pi$-values.
+To estimate these, the neural network learns a Q-function $Q(a, s, \theta_t)$ where $\theta_t$ are the weights calculated by the network.
+These are updated towards the target
+\begin{equation} 
+Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(S_{t+1}, a ; \theta_{t}\right)
+ \end{equation}
+ according to
+\begin{equation}
+\theta_{t+1}=\theta_{t}+\alpha\left(Y_{t}^{\mathrm{Q}}-Q\left(S_{t}, A_{t} ; \theta_{t}\right)\right) \nabla_{\theta_{t}} Q\left(S_{t}, A_{t} ; \theta_{t}\right)
+\end{equation}.
+
+
+
+\end{document}

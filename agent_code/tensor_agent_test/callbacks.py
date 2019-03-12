@@ -30,7 +30,8 @@ def setup(agent):
     #  Define Model
     #========================
     
-    model = load_model('my_model.h5')
+    model = load_model('tensor_agent-model_coins-masked_actions-832k.h5')
+    print('load model')
 
     agent.model = model
 

@@ -12,7 +12,7 @@ from tensorflow.keras import backend as K
 from settings import s, e
 
 from agent_code.tensor_agent.hyperparameters import hp
-from agent_code.tensor_agent.X import RelativeX2 as game_state_X
+from agent_code.tensor_agent.X import AbsoluteX2 as game_state_X
 
 from agent_code.tensor_agent.model import FullModel
 from agent_code.tensor_agent.per import PER_buffer
@@ -44,8 +44,8 @@ def setup(agent):
     model = FullModel(game_state_X.shape, D)
     agent.model = model
     
-    #agent.model.load_weights('tensor_agent-model.h5')
-    
+    agent.model.load_weights('tensor_agent-model_coins-masked_actions-832k.h5')
+    print('loaded weights')
     # Initialize all variables
     init_op = tf.global_variables_initializer()
     K.get_session().run(init_op)

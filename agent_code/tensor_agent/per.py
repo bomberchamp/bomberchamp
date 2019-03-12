@@ -106,7 +106,7 @@ class PER_buffer(object):
         ''' It is important to use tree idx here, not tree '''
         
         priorities=errors+self.PER_e
-        priorities=np.minimum(priorities, self.default_max_p)
+        priorities=np.minimum(priorities, self.default_max_p)  ##to get samples with higher rewards prioritized we need to pick instances with bigger reward. Stored in value_data[2]. Maybe add this to errors+self.PER_e??
         pri_a=priorities**self.PER_a   #modified priority that is actually used
         for i, p in zip(idxs, pri_a):
             self.tree.update(i, p)
