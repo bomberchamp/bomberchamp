@@ -105,7 +105,7 @@ class TensorAgent:
         init_op = tf.global_variables_initializer()
         K.get_session().run(init_op)
 
-        self.buffer=PER_buffer(hp.buffer_size,0.5,0.1,0.1,0.1)   #(hp.buffer_size, PER_a, PER_b, PER_e, anneal)
+        self.buffer=PER_buffer(hp.buffer_size)
         self.steps=0  #to count how many steps have been done so far
 
         self.ms_buffer = MultiStepBuffer()

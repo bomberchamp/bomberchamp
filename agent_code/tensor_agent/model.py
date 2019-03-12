@@ -52,7 +52,7 @@ def create_model(shape, D):
     a = create_stream(x, D)
     # - Merge streams
     outputs = VAMerge()([v, a])
-    outputs = Activation('relu')(outputs)
+    #outputs = Activation('relu')(outputs)
 
     model = Model(inputs=inputs, outputs=outputs)
     return model, inputs, outputs
