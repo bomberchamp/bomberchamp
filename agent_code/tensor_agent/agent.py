@@ -85,7 +85,7 @@ class MultiStepBuffer:
 
 
 class TensorAgent:
-    def __init__(self, input_shape, D, weights=None):
+    def __init__(self, input_shape, D, weights=None, model=None):
         self.input_shape = input_shape
         self.D = D
 
@@ -93,7 +93,10 @@ class TensorAgent:
         #  Define Model
         #========================
 
-        self.model = FullModel(input_shape, D)
+        if model is None:
+            self.model = FullModel(input_shape, D)
+        else:
+            self.model = model
         
         if weights is not None:
             self.model.load_weights(weights)
