@@ -43,7 +43,21 @@ This is not necessarily the best for the learning process, as some experiences m
 This can be improved by prioritized experience replay. Here every experience in the buffer gets a priority according to its TD-error.
 The TD-error meassures the difference between the actual Q-value and the Target-Q-value, so if experiences with bigger TD-errors get bigger priorities, we favorize experience from which there still is a lot to learn.
 The priority $p_i$ is determined from the TD-error $\delta_i$ according to:
-$p_{i}=\left|\delta_{i}\right|+\epsilon $.
+$p_{i}=\left|\delta_{i}\right|+\epsilon $. Hereby $\epsilon$ denotes a small parameter to ensure, that no experience get's priority zero and thus can't be picked for a sample batch.
+New experiences are always added with maximum priority to memory.
+Problematic with this greedy approach is, that only experiences that are picked for learning get their priority updated. Therefore experiences with low inital priority might, because of the buffer memory structure be removed from memory before they could have been picked for learning. It is also very sensitve to noise spikes.
+To overcome this problem stochastic prioritization is used and $p_i$ adjusted according to:
+\begin{equation}
+P(i)=\frac{p_{i}^{\alpha}}{\sum_{k} p_{k}^{\alpha}}.
+\end{equation}
+Here $\alpha$ is another parameter which adjusts the amount of prioritization that is used. For $\alpha=0$ we get the uniform case (no prioritization), whereas $\alpha=1$ leads to greedy prioritization.
+Stochastic prioritization introduces bias to our model. This needs to be considered for updating it, because it could change the solution the model is converging to. To correct this, importance sampling weights (IS weights) are introduced: 
+\begin{equation}
+w_{i}=\left(\frac{1}{N} \cdot \frac{1}{P(i)}\right)^{\beta}.
+\end{equation}
+For $\beta=1$ the bias gets fully compensated. This is most important at the end of the training process. Therefore $\beta$ start at an inital value and is then being annealed during training. \\\\
+An efficient data structure for the memory is crucial for good performance.
+To guarantee this, we implemented a sum tree to store the data, where searching is of complexity $O(1)$ and updating of complexity $O(\log N)$.
 
 
 
