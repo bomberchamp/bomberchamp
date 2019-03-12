@@ -1,16 +1,16 @@
 \documentclass[12pt]{article}
-\usepackage[a4paper,left=1cm,right=1cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage{caption}
+\usepackage{amsmath}
 \title{Machine Learning: Final project bomberchamp}
 \date{today}
 \begin{document}
 
-\section{Training process}
-Using neural networks for training of our bomberman agent, we decided to implement Rainbow (without distributional). For this technique, a number of improvements in deep learning is combined to form an integrated agent. First of all we started with Q-learning.
-The $Q_\pi$ value is computed by choosing an action a for a given state s and calculating all of the future rewards $R_n$ under a given policy $\pi$.
+\section{Model}
+Using neural networks for training of our bomberman agent, we decided to implement Rainbow (without distributional). For this technique, a number of improvements in deep learning is combined to form an integrated agent. Starting with Q-learning, the $Q_\pi$ value is computed by choosing an action a for a given state s and calculating all of the future rewards $R_n$ under a given policy $\pi$.
 Hereby future rewards are scaled by a discount factor $\gamma$ to increase the weight of the immediate rewards.
 
 \begin{equation}
@@ -19,14 +19,32 @@ Q_\pi(s,a)= E\left[\sum_{n=1}^{\infty} \gamma^{n-1}R_n^n\right] \Bigg|_{a,s,\pi}
 
 The optimal Q-values are then determined by taking the maximum of all $Q_\pi$-values.
 To estimate these, the neural network learns a Q-function $Q(a, s, \theta_t)$ where $\theta_t$ are the weights calculated by the network.
-These are updated towards the target
-\begin{equation} 
-Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(S_{t+1}, a ; \theta_{t}\right)
- \end{equation}
- according to
+These are updated towards the target $Y_{t}^{\mathrm{Q}}$.
+\subsection{DQN}
+In Deep Q-learning (DQN) a multi-layered neural network (online network) generates the possible actions for a given state s. Then another network, the target network is used to calculate the targets.
+The target network is similar to the online network but its weights $\theta_t^-$ stay constant for a longer time. They are being copied from the online network every $\tau$ steps.
+The target is calculated by:
 \begin{equation}
-\theta_{t+1}=\theta_{t}+\alpha\left(Y_{t}^{\mathrm{Q}}-Q\left(S_{t}, A_{t} ; \theta_{t}\right)\right) \nabla_{\theta_{t}} Q\left(S_{t}, A_{t} ; \theta_{t}\right)
-\end{equation}.
+Y_{t}^{\mathrm{DQN}} \equiv R_{t+1}+\gamma \max _{a} Q\left(S_{t+1}, a ; \theta_{t}^{-}\right).
+\end{equation}
+Additionally DQN introduces experience replay. Without experience replay, only new experiences are used in training and discarded right afterwards.
+Therefore important but rare experiences are almost immediatly forgotten and the updates are not independent and identical distributed but strongly correlated.
+To address this problem, we implemented an experience buffer, in which the experiences are stored and then at training time sampled uniformly at random.
+\subsection{Double DQN}
+One problem of DQN is, that it overestimates the Q-values because both, action and assosciated Q-value are calculated by the online network.
+A simple solution for this is to use the target network to calculate the Q-values for the action selected by the online network. This decoupling reduces the overestimation.
+The resulting target is:
+\begin{equation}
+Y_{t}^{\text { Double DQN }} \equiv R_{t+1}+\gamma Q\left(S_{t+1}, \underset{a}{\operatorname{argmax}} Q\left(S_{t+1}, a ; \theta_{t}\right), \theta_{t}^{-}\right).
+\end{equation}
+\subsection{Prioritized Experience Replay}
+In standard experience replay, the agent is forced to pick experiences uniformly from all experiences in its memory. Therefore all experiences are sampled with the same frequency that they were originally experienced.
+This is not necessarily the best for the learning process, as some experiences might not hold any valuable information for the agent but occur very often while other rare situations could be crucial for learning.
+This can be improved by prioritized experience replay. Here every experience in the buffer gets a priority according to its TD-error.
+The TD-error meassures the difference between the actual Q-value and the Target-Q-value, so if experiences with bigger TD-errors get bigger priorities, we favorize experience from which there still is a lot to learn.
+The priority $p_i$ is determined from the TD-error $\delta_i$ according to:
+$p_{i}=\left|\delta_{i}\right|+\epsilon $.
+
 
 
 
