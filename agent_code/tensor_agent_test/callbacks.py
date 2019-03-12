@@ -13,6 +13,7 @@ from tensorflow.keras.models import load_model
 
 from settings import s, e
 
+from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 
 
 choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
@@ -30,8 +31,7 @@ def setup(agent):
     #  Define Model
     #========================
     
-    model = load_model('tensor_agent-model_coins-masked_actions-832k.h5')
-    print('load model')
+    model = load_model('tensor_agent-model.h5', custom_objects={'VAMerge': VAMerge, 'NoisyDense': NoisyDense})
 
     agent.model = model
 
