@@ -97,7 +97,7 @@ class PER_buffer(object):
             prob_weight=value_priority/self.tree.total_priority
             weights[i,0]=(1/(k*prob_weight)**hp.PER_b)/max_weight
             minibatch.append(value_data)
-        hp.PER_b=np.minimum(1., hp.PER_b+hp.anneal)
+        hp.PER_b=np.minimum(1., hp.PER_b+hp.PER_anneal)
         return idxs, minibatch, weights
     
     def update(self, idxs, errors):
