@@ -6,7 +6,7 @@ from tensorflow.keras import backend as K
 from settings import s, e
 
 from agent_code.tensor_agent.hyperparameters import hp
-from agent_code.tensor_agent.X import AbsoluteX2 as game_state_X
+from agent_code.tensor_agent.X import RelativeX2 as game_state_X
 
 from agent_code.tensor_agent.agent import TensorAgent
 
@@ -24,36 +24,7 @@ def delayed_reward(reward, disc_factor):
     return dela_rew
 
 
-    K.clear_session()
-    
-    D = len(choices)
-    
-    #========================
-    #  Define Model
-    #========================
-
-    D = len(choices)
-    model = FullModel(game_state_X.shape, D)
-    agent.model = model
-    
-    agent.model.load_weights('tensor_agent-model_coins-masked_actions-832k.h5')
-    print('loaded weights')
-    # Initialize all variables
-    init_op = tf.global_variables_initializer()
-    K.get_session().run(init_op)
-
-    # the alternative Keras way:
-    #training_model = Model(inputs=[inputs, action_holder, reward_holder], outputs=loss)
-    #training_model.compile(loss=lambda y_true, y_pred: y_pred, optimizer='Adam')
-    agent.buffer=PER_buffer(hp.buffer_size,0.5,0.1,0.1,0.1)   #(hp.buffer_size, PER_a, PER_b, PER_e, anneal)
-    agent.steps=0  #to count how many steps have been done so far
-
-    agent.rewards=[]
-    agent.Xs=[]
-    agent.actions=[]
-    np.random.seed()
-
-def filter_invalid(game_state, p):
+def get_valid_actions(game_state):
     # choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
     valid = np.ones((6))
     x, y, _, b, _ = game_state['self']
