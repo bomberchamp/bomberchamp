@@ -121,7 +121,7 @@ class TensorAgent:
         else:
             pred = self.model.online.predict(np.array([X]))[0]
             if valid_actions is not None:
-                pred = softmax(valid_actions * pred)
+                pred = valid_actions * (pred - np.min(pred) + 1)
 
             action_choice = np.argmax(pred)
 
