@@ -19,17 +19,16 @@ from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 def create_conv_net(shape):
     # Convolutional part of the network
     inputs = Input(shape=shape)
-    x = Conv2D(32, 8, strides=(4,4), activation='relu', padding="same")(inputs)
-    x = Conv2D(64, 4, strides=(2,2), activation='relu', padding="same")(x)
-    x = Conv2D(64, 3, strides=(1,1), activation='relu', padding="same")(x)
-    outputs = Flatten()(x)
+    x = Flatten()(inputs)
+    x = Dense(256, activation='relu')(x)
+    outputs = Dense(256, activation='relu')(x)
 
     return inputs, outputs
 
 def create_stream(x, D):
     
-    s = NoisyDense(512, activation='relu')(x)
-    s = NoisyDense(D, activation=None)(s)
+    s = Dense(512, activation='relu')(x)
+    s = Dense(D, activation=None)(s)
     return s
 
 def create_model(shape, D):
@@ -87,6 +86,7 @@ class FullModel:
         
         self.errors=tf.abs(reward_holder-responsible_weight)
         self.input_ph = t_in
+        self.t_out = t_out
         self.action_ph = action_holder
         self.reward_ph = reward_holder
         self.update_op = update
