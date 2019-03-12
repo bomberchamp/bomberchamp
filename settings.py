@@ -1,7 +1,7 @@
 
 from collections import namedtuple
-import pygame
-from pygame.locals import *
+#import pygame
+#from pygame.locals import *
 import logging
 
 
@@ -15,7 +15,7 @@ settings = {
     # Main loop
     'update_interval': 0.1, # 0.33,
     'turn_based': False,
-    'n_rounds': 10,
+    'n_rounds': 3,
     'save_replay': False,
     'make_video_from_replay': False,
 
@@ -23,7 +23,7 @@ settings = {
     'cols': 17,
     'rows': 17,
     'grid_size': 30,
-    'crate_density': 0.75,
+    'crate_density': 0.,
     'actions': ['UP', 'DOWN', 'LEFT', 'RIGHT', 'BOMB', 'WAIT'],
     'max_agents': 4,
     'max_steps': 400,
@@ -39,19 +39,19 @@ settings = {
     'reward_slow': -1,
 
     # User input
-    'input_map': {
-        K_UP: 'UP',
-        K_DOWN: 'DOWN',
-        K_LEFT: 'LEFT',
-        K_RIGHT: 'RIGHT',
-        K_RETURN: 'WAIT',
-        K_SPACE: 'BOMB',
-    },
+    #'input_map': {
+    #    K_UP: 'UP',
+    #    K_DOWN: 'DOWN',
+    #    K_LEFT: 'LEFT',
+    #    K_RIGHT: 'RIGHT',
+    #    K_RETURN: 'WAIT',
+    #    K_SPACE: 'BOMB',
+    #},
 
     # Logging levels
-    'log_game': logging.INFO,
-    'log_agent_wrapper': logging.INFO,
-    'log_agent_code': logging.DEBUG,
+    'log_game': logging.ERROR,
+    'log_agent_wrapper': logging.ERROR,
+    'log_agent_code': logging.INFO,
 }
 settings['grid_offset'] = [(settings['height'] - settings['rows']*settings['grid_size'])//2] * 2
 s = namedtuple("Settings", settings.keys())(*settings.values())
