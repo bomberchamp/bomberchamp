@@ -207,6 +207,8 @@ class Game:
         if permutation is None:
             permutation = np.random.permutation(len(self.agents))
 
+        step_score = {n: 0 for _,_,n,_,_ in self.agents}
+
         # Agents
         for j in range(len(self.agents)):
             agent = self.agents[permutation[j]]
@@ -235,7 +237,7 @@ class Game:
         for j in range(len(self.agents)):
             x, y, name, bombs_left, score = self.agents[j]
             if self.coins[x,y]==1:
-                self.score[name]+=s.reward_coin
+                step_score[name]+=s.reward_coin
             self.coins[x,y]=0
         
             
@@ -267,7 +269,7 @@ class Game:
                 a, b, name_k, c, d = killer
                 if name_k!=name:
                     print('bombed by', name_k)
-                    self.score[name_k]+=s.reward_kill
+                    step_score[name_k]+=s.reward_kill
                 else:
                     print('suicide')
                 agents_hit.add(self.agents[j])
@@ -288,6 +290,11 @@ class Game:
 
         if len(self.agents) == 0 or self.steps >= 400:
             self.terminated = True
+
+        for _, _, n, _, _ in self.agents:
+            self.score[n] = step_score[n]
+
+        return step_score
 
 
     def get_state(self, agent):
