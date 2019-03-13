@@ -77,7 +77,7 @@ class PER_buffer(object):
         
         
         
-    def sample(self, k):  #k:how many experiences in one sample
+    def sample(self, k=hp.sample_size):  #k:how many experiences in one sample
         
         priority_range = self.tree.total_priority/k
         minibatch=[]
@@ -100,10 +100,13 @@ class PER_buffer(object):
         hp.PER_b=np.minimum(1., hp.PER_b+hp.PER_anneal)
         return idxs, minibatch, weights
     
-    def update(self, idxs, errors):
+    def update(self, idxs, errors, rewards=None):
         ''' It is important to use tree idx here, not tree '''
         
-        priorities=errors+hp.PER_e
+        if hp.rewards_update==False:
+            priorities=errors+hp.PER_e
+        else:
+            priorities=errors+hp.PER_e+np.maximum(rewards, 0.5)
         priorities=np.minimum(priorities, self.default_max_p)
         pri_a=priorities**hp.PER_a   #modified priority that is actually used
         for i, p in zip(idxs, pri_a):
