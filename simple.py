@@ -218,7 +218,7 @@ class Game:
                     
             if action == 'BOMB' and bombs_left > 0:
                 self.bombs[x, y] = s.bomb_timer + 2
-                bombs_left = -s.bomb_timer + 2
+                bombs_left = -s.bomb_timer - 1
                 self.exp.append(expl(agent,explosion_spread_xy(x,y),(x,y)))
             if action == 'DOWN' and self.tile_is_free(x, y+1):
                 y += 1

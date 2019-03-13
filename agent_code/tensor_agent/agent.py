@@ -185,4 +185,4 @@ class TensorAgent:
         if save is not None:
             self.model.save(save)
 
-        print(f'End of episode. Steps: {self.steps}')
+        print(f'End of episode. Steps: {self.steps}. Trained: {self.model.steps}')
