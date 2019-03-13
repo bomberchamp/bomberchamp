@@ -15,6 +15,7 @@ class Hyperparameters:
         self.PER_b = 0.4
         self.PER_anneal = (1. - 0.4) / 1000000
         self.PER_e = 1e-8
+        self.rewards_update=False #include size of reward for priority update
         self.update_frequency = 4 # update every x frames
 
         self.peaceful = True # No bombs

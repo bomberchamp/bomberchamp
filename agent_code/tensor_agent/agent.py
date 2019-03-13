@@ -169,8 +169,11 @@ class TensorAgent:
                 actions = actions[:,None], \
                 rewards = rewards[:,None], \
                 per_weights = weights)
-
-            self.buffer.update(idxs, errors)
+            
+            if hp.rewards_update==True:
+                self.buffer.update(idxs, errors,rewards)
+            else:
+                self.buffer.update(idxs, errors)
 
 
     def end_of_episode(self, save=None):
