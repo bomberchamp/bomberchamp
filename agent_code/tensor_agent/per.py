@@ -100,10 +100,10 @@ class PER_buffer(object):
         hp.PER_b=np.minimum(1., hp.PER_b+hp.PER_anneal)
         return idxs, minibatch, weights
     
-    def update(self, idxs, errors, rewards=0):
+    def update(self, idxs, errors, rewards=None):
         ''' It is important to use tree idx here, not tree '''
         
-        if rewards==0:
+        if rewards is None:
             priorities=errors+hp.PER_e
         else:
             priorities=errors+hp.PER_e+np.maximum(rewards, 0.5)
