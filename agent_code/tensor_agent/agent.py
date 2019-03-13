@@ -171,7 +171,7 @@ class TensorAgent:
                 per_weights = weights)
             
             if hp.rewards_update==True:
-                self.buffer.update(idxs, errors,rewards)
+                self.buffer.update(idxs, errors,rewards[:,None])
             else:
                 self.buffer.update(idxs, errors)
 
