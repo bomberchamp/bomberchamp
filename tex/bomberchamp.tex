@@ -1,10 +1,12 @@
 \documentclass[12pt]{article}
-\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+%\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{amsmath}
+\usepackage[backend=biber]{biblatex}
+\bibliography{literature.bib}
 \title{Machine Learning: Final project bomberchamp}
 \date{today}
 \begin{document}
@@ -58,8 +60,21 @@ w_{i}=\left(\frac{1}{N} \cdot \frac{1}{P(i)}\right)^{\beta}.
 For $\beta=1$ the bias gets fully compensated. This is most important at the end of the training process. Therefore $\beta$ start at an inital value and is then being annealed during training. \\\\
 An efficient data structure for the memory is crucial for good performance.
 To guarantee this, we implemented a sum tree to store the data, where searching is of complexity $O(1)$ and updating of complexity $O(\log N)$.
+\subsection{Dueling networks}
+The idea behind dueling networks is, that for some states it is irrelevant which action to pick.
+Consider a small toy problem: Our agent needs to catch coins which are falling down form above, he can either move right or left or wait to catch them. The coins are falling randomly. Sometimes there are no coins falling down at all in one state. In this state it is not important which action is chosen, whereas for other states ist is.
+To exploit this the neural network is splitted into two streams: \textbf{TODO: include image} the action and the state-value stream. The benefit of this is, that it is possible to get separate estimations for state-value and action. Hereby the state value $V(s ; \theta_d, \beta)$ is a scalar property while the action-vector $A(s, a ; \theta_d, \alpha)$ has the dimension of the quantity of possible action choices. $\theta_d$ are the weights of the network before splitting into two streams, while $\alpha$ and $\beta$ are the weights for the A- and the V- stream respectively.
+Now A and V need to be recombined into a Q-value. It is not a good idea though to simply add them:
+\begin{equation}
+Q(s, a ; \theta, \alpha, \beta)=V(s ; \theta, \beta)+A(s, a ; \theta, \alpha).
+\end{equation}
+In that case it gets impossible to retrieve V and A from Q uniquely. One could add a constant to A and substract it from V without changing Q.
+It is better to calculate Q by
+\begin{equation}
+Q(s, a ; \theta, \alpha, \beta)=V(s ; \theta, \beta)+ \left(A(s, a ; \theta, \alpha)-\frac{1}{|\mathcal{A}|} \sum_{a^{\prime}} A\left(s, a^{\prime} ; \theta, \alpha\right)\right),
+\end{equation}
+where A and V keep their identifiability and the optimization becomes more stable \cite{DBLP:journals/corr/WangFL15}.
 
-
-
+\printbibliography
 
 \end{document}
