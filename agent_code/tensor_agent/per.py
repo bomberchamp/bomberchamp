@@ -103,7 +103,7 @@ class PER_buffer(object):
     def update(self, idxs, errors, rewards=None):
         ''' It is important to use tree idx here, not tree '''
         
-        if rewards is None:
+        if hp.rewards_update==False:
             priorities=errors+hp.PER_e
         else:
             priorities=errors+hp.PER_e+np.maximum(rewards, 0.5)
