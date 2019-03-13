@@ -50,7 +50,7 @@ class SumTree(object):
             if self.tree[left_child]>=value:
                 parent=left_child
             else:
-                value-=tree.tree[left_child]
+                value-=self.tree[left_child]
                 parent=right_child
         leave_index=parent
         return leave_index, self.tree[leave_index], self.data[leave_index-self.capacity+1]
