@@ -23,6 +23,8 @@ class SumTree(object):
             
             index=int(np.floor((index-1)/2))
             self.tree[index]= self.tree[index]+priority-old_priority
+        
+        self.total_priority=self.tree[0]
             
     def add(self, priority, new_data):
         
@@ -33,8 +35,6 @@ class SumTree(object):
         self.pointer+=1
         if self.pointer>=self.capacity:
             self.pointer=0
-        
-        self.total_priority=self.tree[0]
         
     def get_leave(self, value):
         bottom=False
@@ -50,7 +50,7 @@ class SumTree(object):
             if self.tree[left_child]>=value:
                 parent=left_child
             else:
-                value-=left_child
+                value-=tree.tree[left_child]
                 parent=right_child
         leave_index=parent
         return leave_index, self.tree[leave_index], self.data[leave_index-self.capacity+1]
