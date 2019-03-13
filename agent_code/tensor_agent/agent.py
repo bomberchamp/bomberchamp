@@ -160,7 +160,7 @@ class TensorAgent:
         #=======================
 
         if self.steps % hp.update_frequency == 0 and np.min(self.buffer.tree.tree[-self.buffer.tree.capacity:])>0:
-            idxs, minibatch, weights = self.buffer.sample(2)
+            idxs, minibatch, weights = self.buffer.sample(hp.sample_size)
             Xs = (np.array([each[0] for each in minibatch]))
             actions = (np.array([each[1] for each in minibatch]))
             rewards = (np.array([each[2] for each in minibatch]))

@@ -77,7 +77,7 @@ class PER_buffer(object):
         
         
         
-    def sample(self, k):  #k:how many experiences in one sample
+    def sample(self, k=hp.sample_size):  #k:how many experiences in one sample
         
         priority_range = self.tree.total_priority/k
         minibatch=[]
