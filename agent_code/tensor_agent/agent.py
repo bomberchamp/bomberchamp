@@ -71,7 +71,7 @@ class MultiStepBuffer:
 
         # add gamma**0 to gamma**(n-1) times the reward to the appropriate rewards
         for i in range(len(self.rewards)):
-            self.rewards[-i] += reward * hp.discount_factor ** i
+            self.rewards[-(i+1)] += reward * hp.discount_factor ** i
 
         return result
 
