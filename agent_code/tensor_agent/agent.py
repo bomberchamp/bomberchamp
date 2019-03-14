@@ -145,8 +145,9 @@ class TensorAgent:
         result = self.ms_buffer.push(*sample, target_model=self.model.target)
         if result is not None:
             X, action, reward = result
-            for X_, action_ in augment(X, action):
-                self.buffer.add(X_, action_, reward)
+            self.buffer.add(X, action, reward)
+            #for X_, action_ in augment(X, action):
+            #    self.buffer.add(X_, action_, reward)
 
         #=======================
         # Update online network
@@ -179,8 +180,9 @@ class TensorAgent:
     def end_of_episode(self, save=None):
         Xs, actions, rewards = self.ms_buffer.clear()
         for i in range(len(actions)):
-            for X_, action_ in augment(Xs[i], actions[i]):
-                self.buffer.add(X_, action_, rewards[i])
+            self.buffer.add(Xs[i], actions[i], rewards[i])
+            #for X_, action_ in augment(Xs[i], actions[i]):
+            #    self.buffer.add(X_, action_, rewards[i])
 
         if save is not None:
             self.model.save(save)
