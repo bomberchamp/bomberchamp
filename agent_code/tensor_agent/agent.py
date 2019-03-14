@@ -56,7 +56,7 @@ class MultiStepBuffer:
 
         if (len(self.rewards) >= hp.multi_step_n):
             computed_v = target_model.predict(np.array([X]))
-            r = self.rewards[0] + np.max(computed_v) * hp.discount_factor ** hp.multi_step_n
+            r = self.rewards[0] + computed_v[0][action_choice] * hp.discount_factor ** hp.multi_step_n
             result = [self.Xs[0], self.actions[0], r]
             
             self.rewards = self.rewards[1:]
