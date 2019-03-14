@@ -2,3 +2,4 @@ difficulties:
 - nothing works
 - Invalid actions -> solutions
 - agent is bored (no coins in sight) -> more coins
+- default reward >=0: stagnation -> changed to negative
