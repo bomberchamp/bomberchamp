@@ -21,5 +21,6 @@ class Hyperparameters:
         self.update_frequency = 4 # update every x frames
 
         self.peaceful = True # No bombs
+        self.valid = True #If True: Invalid actions are forbidden, if false invalid actions are punished
 
 hp = Hyperparameters()
