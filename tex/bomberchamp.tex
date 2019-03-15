@@ -6,32 +6,59 @@
 \usepackage{caption}
 \usepackage{amsmath}
 \usepackage[backend=biber]{biblatex}
+\usepackage{amssymb}
 \bibliography{literature.bib}
 \title{Machine Learning: Final project bomberchamp}
 \date{today}
 \begin{document}
 
 \section{Model}
-Using neural networks for training of our bomberman agent, we decided to implement Rainbow (without distributional). For this technique, a number of improvements in deep learning is combined to form an integrated agent. Starting with Q-learning, the $Q_\pi$ value is computed by choosing an action a for a given state s and calculating all of the future rewards $R_n$ under a given policy $\pi$.
-Hereby future rewards are scaled by a discount factor $\gamma$ to increase the weight of the immediate rewards.
-
+In reinforcement learning, an agent needs to learn how to act optimally in sequential decision making problems by maximizing a reward signal. This means, that the agent is provided with some kind of input state and then needs to choose an action. The subsequent state, depends on the chosen action and the input state. This subsequent state as well as an reward based on how well the agent performed is given back to the agent. To find a good policy on how to act, the agent needs to optimize these rewards.
+The true value of an action under a chosen policy is defined as the sum of the current reward for that action and the discounted future rewards:
 \begin{equation}
-Q_\pi(s,a)= E\left[\sum_{n=1}^{\infty} \gamma^{n-1}R_n^n\right] \Bigg|_{a,s,\pi}
+Q_\pi(s,a)= E\left[\sum_{n=1}^{\infty} \gamma^{n-1}R_n^n\right] \Bigg|_{a,s,\pi}.
+\end{equation} 
+$\gamma\,\epsilon\,[0,1]$ denotes the discounting factor.
+The best policy is then determined by maximizing $Q_\pi$ over the actions in every step.
+\subsection{Q-learning}
+Usually it is not possible to learn every action for every state explicitly because the problems are often to extensive. Therefore The Q-values get approximated by a parametrized function $Q(a,s,\theta_t)$. Which is updated towards the target value $Y_{t}^{\mathrm{Q}}$:
+\begin{equation}
+Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(S_{t+1}, a ; \boldsymbol{\theta}_{t}\right)
 \end{equation}
+after each action via:
+\begin{equation}
+\boldsymbol{\theta}_{t+1}=\boldsymbol{\theta}_{t}+\alpha\left(Y_{t}^{\mathrm{Q}}-Q\left(S_{t}, A_{t} ; \boldsymbol{\theta}_{t}\right)\right) \nabla_{\boldsymbol{\theta}_{t}} Q\left(S_{t}, A_{t} ; \boldsymbol{\theta}_{t}\right).
+\end{equation}
+\cite{DBLP:journals/corr/HasseltGS15}
+This makes it an off-policy algorithm, as the optimal $Q$-value: $Q^*$ is approximated by $Q$ directly (regardless of the followed policy) in contrast to for example SARSA. The policy is still important as it determines, which state-action pairs are used to update the model\cite{Sutton:1998:IRL:551283}. 
+Q-learning is also a model free approach, as it doesn't a model of the environment but instead directly estimates $Q^*$.
+%In our case with bomberman, the problem is fully observable, meaning that the agent knows the entire state of the environment at every step of the game.
 
-The optimal Q-values are then determined by taking the maximum of all $Q_\pi$-values.
-To estimate these, the neural network learns a Q-function $Q(a, s, \theta_t)$ where $\theta_t$ are the weights calculated by the network.
-These are updated towards the target $Y_{t}^{\mathrm{Q}}$.
+\subsection{Neural Networks}
+For some reinforcement learning problems, the simplest implementation of the Q-learning algorithm, a table is perfectly sufficient to find a good policy.
+If we consider more complicated problems with bigger inputs other methods are needed. For state of the art reinforcement learning, usually neural networks are being used. %TODO explain neural networks
+They are especially convenient as they are trained from raw inputs, which makes handcrafted features redundant \cite{DBLP:journals/corr/MnihKSGAWR13}.
+Neural Networks which are implemented to learn with the Q-algorithm are called Q-networks.
+They are a non linear function approximation for $Q(s,a,\theta_t)$.
+To update the Q-network the loss function
+\begin{equation}
+L_{t}\left(\theta_{t}\right)=\mathbb{E}_{s, a \sim \rho(s,a)}\left[\left(Y_{t}^{\mathrm{Q}}-Q\left(s, a ; \theta_{t}\right)\right)^{2}\right]
+\end{equation}
+where $\rho(s, a)$ is a probability distribution over states and actions. To make this compatible with the Q-learning algorithm, the weights need to be updated at every step and the expectations exchanged with samples from the probability distribution $\rho(s,a)$.
+
 \subsection{DQN}
-In Deep Q-learning (DQN) a multi-layered neural network (online network) generates the possible actions for a given state s. Then another network, the target network is used to calculate the targets.
-The target network is similar to the online network but its weights $\theta_t^-$ stay constant for a longer time. They are being copied from the online network every $\tau$ steps.
-The target is calculated by:
+To get from Q-networks to Deep Q-networks (DQN) there are two mayor improvements.
+First: two multi-layered neural networks are used: The online network and the target network. The target network is used to calculate the targets. They both have the same structure but to make learning more stable, the weights of the target network $\theta_t^-$ stay constant for a longer time. 
+They are being copied from the online network every $\tau$ steps.
+The target is then calculated by:
 \begin{equation}
 Y_{t}^{\mathrm{DQN}} \equiv R_{t+1}+\gamma \max _{a} Q\left(S_{t+1}, a ; \theta_{t}^{-}\right).
 \end{equation}
+If everything was made by only one network, an update of $Q(s,a)$ does often not only lead to a higher value of $Q(s_t,a_t)$ but also higher expected Q-values $Q(s_{t+1},a)$ for all actions. If the target is also calculated by this network this can lead to oscillations or divergence of the policy \cite{DBLP:journals/corr/MnihKSGAWR13}.
 Additionally DQN introduces experience replay. Without experience replay, only new experiences are used in training and discarded right afterwards.
 Therefore important but rare experiences are almost immediately forgotten and the updates are not independent and identical distributed but strongly correlated.
-To address this problem, we implemented an experience buffer, in which the experiences are stored and then at training time sampled uniformly at random.
+To address this problem, an experience buffer is implemented, in which the experiences are stored and then at training time sampled uniformly at random. Usually a simple FIFO algorithm is being used. But there are more sophisticated methods for this, one of those is discussed later.
+\section{Training process}
 \subsection{Double DQN}
 Q-learning  and also DQN tend to learn overestimated action values. Because of the maximization step over the action choices, values are rather over than underestimated.
 This isn't necessarily a problem, if they are uniformly overestimated or if interesting experiences are overestimated. However, in DQN overestimations differ for different actions and states. Combined with bootstrapping, this results in the propagation of wrong values and thus to worse policies. To reduce those overestimations, the Double Q-learning algorithm is used. 
