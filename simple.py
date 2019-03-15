@@ -78,35 +78,12 @@ def explosion_spread_xy(x, y):
     return elements
 
 
-def get_x(arena, self, others, bombs, explosions, coins):
-    X = np.zeros((s.cols, s.rows, 6))
-    
-    X[:,:,0] = arena
-    
-    X[self[0],self[1],1] = 2 if self[3] > 0 else 1
-    
-    # one channel for each player
-    #for i in range(len(others)):
-    #    X[others[i][0], others[i][1], i+2] = 2 if others[i][3] > 0 else 1
-
-    # one channel for all enemies combined
-    for i in range(len(others)):
-        X[others[i][0], others[i][1], 2] = 2 if others[i][3] > 0 else 1
-    
-    X[:,:,3] = bombs
-    
-    X[:,:,4] = explosions
-
-    X[:,:,5] = coins
-
-    return X
-
-def play_replay(replay):
+def play_replay(replay, get_x):
     arena = np.copy(replay['arena'])
     coins = np.zeros(arena.shape)
     coinlist = replay['coins']
 
-    agents = [(x, y, name, bombs_left, 0) for x, y, name, bombs_left in replay['agents']]
+    agents = [a for a in replay['agents']]
     permutations = replay['permutations']
     actions = replay['actions']
 
@@ -127,15 +104,15 @@ def play_replay(replay):
             _, _, name, _, _ = agent
             agent_actions[name] = actions[name][i]
 
-            Xs.append(get_x(*game.get_state(agent)))
+            Xs.append(get_x(game.get_game_state(agent)))
             ys.append(action_y_map[agent_actions[name]])
 
 
         game.step(agent_actions, permutation)
 
         
-    print(game.score)
-    #return Xs, ys
+    #print(game.score)
+    return Xs, ys
 
 
 class Game:
@@ -255,7 +232,7 @@ class Game:
         for j in range(len(self.agents)):
             x, y, name, bombs_left, score = self.agents[j]
             if self.explosions[x, y] > 1:
-                print(f"agent {self.agents[j]} was bombed at {x}, {y} in step {self.steps}")
+                #print(f"agent {self.agents[j]} was bombed at {x}, {y} in step {self.steps}")
                 owners=[]
                 dists=[]
                 for e in self.exp:
@@ -268,10 +245,10 @@ class Game:
                     killer=owners[np.argmin(np.array(dists))].owner
                 a, b, name_k, c, d = killer
                 if name_k!=name:
-                    print('bombed by', name_k)
+                    #print('bombed by', name_k)
                     step_score[name_k]+=s.reward_kill
-                else:
-                    print('suicide')
+                #else:
+                    #print('suicide')
                 agents_hit.add(self.agents[j])
     
             for a in range(len(self.arena)):
@@ -282,13 +259,15 @@ class Game:
         self.explosions = np.maximum(np.zeros(self.explosions.shape), self.explosions-1)
         
         for a in agents_hit:
+            _, _, n, _, _ = a
+            step_score[n] -= s.reward_kill
             self.agents.remove(a)
         for e in self.exp:
             e.timer-=1
             if e.timer<=-3:
                 self.exp.remove(e)
 
-        if len(self.agents) == 0 or self.steps >= 400:
+        if len(self.agents) == 0 or self.steps >= 400 or (np.all(self.arena != 1) and np.all(self.coins == 0)):
             self.terminated = True
 
         for _, _, n, _, _ in self.agents:
@@ -308,7 +287,7 @@ class Game:
             'arena': self.arena,
             'self': agent,
             'others': [a for a in self.agents if a != agent],
-            'bombs': np.concatenate([np.stack(np.where(self.bombs >= 1)),[self.bombs[self.bombs >= 1] - 1]]).T,
+            'bombs': np.concatenate([np.stack(np.where(self.bombs >= 1)),[self.bombs[self.bombs >= 1] - 1]]).T.astype(int),
             'explosions': self.explosions,
             'coins': np.array(np.where(self.coins == 1)).T
         }
