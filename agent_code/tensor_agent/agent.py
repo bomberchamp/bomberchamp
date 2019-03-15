@@ -106,7 +106,6 @@ class TensorAgent:
         K.get_session().run(init_op)
 
         self.buffer=PER_buffer(hp.buffer_size)
-        self.invalid_actions=0
         self.steps=0  #to count how many steps have been done so far
 
         self.ms_buffer = MultiStepBuffer()

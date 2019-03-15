@@ -92,7 +92,6 @@ class FullModel:
         self.reward_ph = reward_holder
         self.update_op = update
         self.weights = weight_holder
-        self.invalid_actions=0
 
         self.steps = 0
 

@@ -59,8 +59,7 @@ def setup(self):
     
     D = len(choices)
     
-    self.ta = TensorAgent(game_state_X.shape, D, weights='tensor_agent-model_big.h5')
-    print('setup')
+    self.ta = TensorAgent(game_state_X.shape, D, weights=None)
 
 
 def act(self):
@@ -78,9 +77,6 @@ def act(self):
 
     self.next_action = choices[self.action_choice]
     
-    if hp.valid == False and valid_actions[self.action_choice]==0:
-        self.ta.invalid_actions += 1
-        
     
 def end_of_episode(self):
     self.ta.end_of_episode()
@@ -95,6 +91,7 @@ def reward_update(self):
     self_killed = events.count(e.KILLED_SELF)
     got_killed = events.count(e.GOT_KILLED)
     survived_round = events.count(e.SURVIVED_ROUND)
+    invalid_actions = events.count(INVALID_ACTION)
 
 
     # survive
@@ -103,9 +100,10 @@ def reward_update(self):
     reward += 0.1 * crates_destroyed + 0.5 * coins_found + s.reward_coin * coins_collected
     # kill opponents
     reward += s.reward_kill * opponents_killed
+
     if hp.valid==False:
-        reward -= self.ta.invalid_actions * 0.2
-    self.ta.invalid_actions=0
+        reward -= invalid_actions * 0.2
+
     self.reward = reward
 
     self.ta.reward_update([self.X, self.action_choice, self.reward])
