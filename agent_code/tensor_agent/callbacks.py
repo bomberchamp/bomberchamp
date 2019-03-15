@@ -91,7 +91,7 @@ def reward_update(self):
     self_killed = events.count(e.KILLED_SELF)
     got_killed = events.count(e.GOT_KILLED)
     survived_round = events.count(e.SURVIVED_ROUND)
-    invalid_actions = events.count(INVALID_ACTION)
+    invalid_actions = events.count(e.INVALID_ACTION)
 
 
     # survive
