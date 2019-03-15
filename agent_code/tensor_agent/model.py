@@ -20,8 +20,9 @@ def create_conv_net(shape):
     # Convolutional part of the network
     inputs = Input(shape=shape)
     x = Flatten()(inputs)
-    x = Dense(256, activation='relu')(x)
-    outputs = Dense(256, activation='relu')(x)
+    x = Dense(512, activation='relu')(x)
+    x = Dense(512, activation='relu')(x)
+    outputs = Dense(512, activation='relu')(x)
 
     return inputs, outputs
 
