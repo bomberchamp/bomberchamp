@@ -22,8 +22,8 @@ def augment(X, action):
     # Data Augmentation
     #===================
 
-    actionslr=[1,0,2,3,4,5]
-    actionsud=[0,1,3,2,4,5]
+    actionslr=[0,1,3,2,4,5]
+    actionsud=[1,0,2,3,4,5]
     actionsudlr=[1,0,3,2,4,5]
 
     Xlr=np.fliplr(X)
