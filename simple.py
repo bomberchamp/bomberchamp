@@ -116,10 +116,12 @@ def play_replay(replay, get_x):
 
 
 class Game:
-    def __init__(self, arena, coins, agents):
+    def __init__(self, arena, coins, agents, aux_reward_crates=0):
         self.arena = np.copy(arena)
         self.coins = np.copy(coins)
         self.agents = copy(agents)
+
+        self.aux_reward_crates = aux_reward_crates
 
         self.bombs = np.zeros(arena.shape)
        
@@ -227,7 +229,16 @@ class Game:
         self.bombs = np.maximum(np.zeros(self.bombs.shape), self.bombs-1)
         
         # Explosions
+        boxes_hit = np.logical_and(self.explosions > 1, self.arena == 1)
         self.arena[self.explosions > 1] = 0
+
+
+        for e in self.exp:
+            np.sum(boxes_hit[np.array(list(e.coords)).astype(int)])
+            _, _, name, _, _ = e.owner
+            step_score[name] += self.aux_reward_crates
+
+
         agents_hit = set()
         for j in range(len(self.agents)):
             x, y, name, bombs_left, score = self.agents[j]
