@@ -5,7 +5,7 @@ import time
 from copy import copy
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
-from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D
+from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D, MaxPooling2D, Cropping2D, Concatenate
 from tensorflow.keras.models import Sequential, Model
 
 from tensorflow.keras import backend as K
@@ -19,10 +19,24 @@ from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 def create_conv_net(shape):
     # Convolutional part of the network
     inputs = Input(shape=shape)
-    x = Flatten()(inputs)
-    x = Dense(512, activation='relu')(x)
-    x = Dense(512, activation='relu')(x)
-    outputs = Dense(512, activation='relu')(x)
+    x = Conv2D(32,1, padding='same', activation='relu')(inputs)
+    
+    x2 = Cropping2D(14)(inputs)
+    x2 = Conv2D(64,3, padding='same', activation='relu')(x2)
+    x2 = Flatten()(x2)
+    
+    x3 = Cropping2D(10)(inputs)
+    x3 = Conv2D(64, 3, padding='same', activation='relu')(x3)
+    x3 = Conv2D(64, 3, strides=(2,2), padding='same', activation='relu')(x3)
+    x3 = Flatten()(x3)
+    
+    x = Conv2D(64,4, strides=(2,2), padding='same', activation='relu')(x)
+    x = Conv2D(64,3, strides=(2,2), padding='same', activation='relu')(x)
+    x = MaxPooling2D()(x)
+    x = Conv2D(64,3, strides=(1,1), padding='same', activation='relu')(x)
+    x = Flatten()(x)
+
+    outputs = Concatenate()([x, x2, x3])
 
     return inputs, outputs
 
