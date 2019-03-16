@@ -152,3 +152,27 @@ class Minimal:
         centered_X = np.zeros((s.cols * 2 - 1, s.rows * 2 - 1, 2))
         centered_X[s.cols-1-x:s.cols*2-1-x, s.rows-1-y:s.rows*2-1-y] = X
         return centered_X
+
+
+class SuperMinimal:
+    shape = (s.cols * 2 - 1, s.rows * 2 - 1, 1)
+
+    @staticmethod
+    def get(game_state):
+        arena = game_state['arena']
+        self = game_state['self']
+        others = game_state['others']
+        bombs = game_state['bombs']
+        explosions = game_state['explosions']
+        coins = game_state['coins']
+        # channels: arena, boxes, others, bombs, explosions, coins -> c = 6
+        X = np.zeros((s.cols, s.rows, 1))
+
+        for i in range(len(coins)):
+            X[coins[i][0], coins[i][1], 0] = 1
+        
+        x, y, _, _, _ = self
+
+        centered_X = np.zeros((s.cols * 2 - 1, s.rows * 2 - 1, 1))
+        centered_X[s.cols-1-x:s.cols*2-1-x, s.rows-1-y:s.rows*2-1-y] = X
+        return centered_X
