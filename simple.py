@@ -139,9 +139,9 @@ class Game:
         self.terminated = False
 
     @staticmethod
-    def create_arena(agent_names):
+    def create_arena(agent_names, crate_density=s.crate_density):
         # Arena with wall and crate layout
-        arena = (np.random.rand(s.cols, s.rows) < s.crate_density).astype(int)
+        arena = (np.random.rand(s.cols, s.rows) < crate_density).astype(int)
         arena[:1, :] = -1
         arena[-1:,:] = -1
         arena[:, :1] = -1
