@@ -98,12 +98,12 @@ class TensorAgent:
         else:
             self.model = model
         
-        if weights is not None:
-            self.model.load_weights(weights)
-        
         # Initialize all variables
         init_op = tf.global_variables_initializer()
         K.get_session().run(init_op)
+
+        if weights is not None:
+            self.model.load_weights(weights)
 
         self.buffer=PER_buffer(hp.buffer_size)
         self.steps=0  #to count how many steps have been done so far
