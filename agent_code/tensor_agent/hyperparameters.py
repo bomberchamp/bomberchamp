@@ -20,7 +20,7 @@ class Hyperparameters:
         self.rewards_update=False #include size of reward for priority update
         self.update_frequency = 4 # update every x frames
 
-        self.peaceful = True # No bombs
+        self.peaceful = False  #bombs
         self.valid = True #If True: Invalid actions are forbidden, if false invalid actions are punished
 
 hp = Hyperparameters()
