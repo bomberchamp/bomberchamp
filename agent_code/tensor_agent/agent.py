@@ -157,7 +157,7 @@ class TensorAgent:
         #=======================
 
         if self.steps % hp.target_network_period == 0:
-            self.model.update_online()
+            self.model.update_target()
 
         #=======================
         # Train target network

@@ -72,8 +72,8 @@ class FullModel:
         #========================
 
         # Define online and target models for Double Q-learning
-        self.online, _, _ = create_model(input_shape, D)
-        self.target, t_in, t_out = create_model(input_shape, D)
+        self.online, o_in, o_out = create_model(input_shape, D)
+        self.target, _, _ = create_model(input_shape, D)
 
         
         #========================
@@ -84,7 +84,7 @@ class FullModel:
         weight_holder = Input(shape=(1,))
         
         # applies a mask to the outputs so that only the prediction for the chosen action is considered
-        responsible_weight = tf.batch_gather(t_out, action_holder)
+        responsible_weight = tf.batch_gather(o_out, action_holder)
         
         loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
         tf.summary.scalar('loss', loss)
@@ -100,8 +100,8 @@ class FullModel:
                                       K.get_session().graph)
         
         self.errors=tf.abs(reward_holder-responsible_weight)
-        self.input_ph = t_in
-        self.t_out = t_out
+        self.input_ph = o_in
+        self.o_out = o_out
         self.action_ph = action_holder
         self.reward_ph = reward_holder
         self.update_op = update
@@ -122,19 +122,21 @@ class FullModel:
         self.steps += 1
         return errors
 
-    def update_online(self):
-        self.online.set_weights(self.target.get_weights())
+    def update_target(self):
+        self.target.set_weights(self.online.get_weights())
 
     def save(self, file='my_model.h5'):
-        self.target.save(file)
+        self.online.save(file)
 
     def load_weights(self, file='my_model.h5'):
+        print('loading weights')
         self.online.load_weights(file)
         self.target.load_weights(file)
+        print('weights loaded')
 
-    def clone(self, share_online=True):
+    def clone(self, share_target=True):
         clone = copy(self)
-        if not share_online:
-            clone.online, _, _ = create_model(input_shape, D)
+        if not share_target:
+            clone.target, _, _ = create_model(input_shape, D)
 
         return clone
