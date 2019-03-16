@@ -289,7 +289,7 @@ class Game:
             'others': [a for a in self.agents if a != agent],
             'bombs': np.concatenate([np.stack(np.where(self.bombs >= 1)),[self.bombs[self.bombs >= 1] - 1]]).T.astype(int),
             'explosions': self.explosions,
-            'coins': np.array(np.where(self.coins == 1 and self.arena == 0)).T
+            'coins': np.array(np.where(np.logical_and(game.coins == 1, game.arena == 0))).T
         }
 
     def tile_is_free(self, x, y):
