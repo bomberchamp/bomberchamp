@@ -2,6 +2,7 @@
 import numpy as np
 import tensorflow as tf
 import random
+from copy import copy
 
 from tensorflow.keras.layers import Input, Dense, Reshape, Flatten, Dropout, Conv2D
 from tensorflow.keras.layers import BatchNormalization, Activation, ZeroPadding2D
@@ -85,7 +86,7 @@ class MultiStepBuffer:
 
 
 class TensorAgent:
-    def __init__(self, input_shape, D, weights=None, model=None):
+    def __init__(self, input_shape, D, weights=None, model=None, er_buffer=None):
         self.input_shape = input_shape
         self.D = D
 
@@ -105,7 +106,11 @@ class TensorAgent:
         if weights is not None:
             self.model.load_weights(weights)
 
-        self.buffer=PER_buffer(hp.buffer_size)
+        if er_buffer is None:
+            self.buffer=PER_buffer(hp.buffer_size)
+        else:
+            self.buffer = er_buffer
+
         self.steps=0  #to count how many steps have been done so far
 
         self.ms_buffer = MultiStepBuffer()
@@ -191,3 +196,13 @@ class TensorAgent:
             self.model.save(save)
 
         #print(f'End of episode. Steps: {self.steps}. Trained: {self.model.steps}')
+
+    def clone(self):
+        clone = copy(self)
+
+        # Steps get counted per agent
+        self.steps=0
+        # Multi-Step buffer needs to be done per agent so rewards get discounted properly
+        self.ms_buffer = MultiStepBuffer()
+
+        return clone
