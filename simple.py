@@ -272,7 +272,7 @@ class Game:
         exp_to_remove = []
         for e in self.exp:
             e.timer -= 1
-            if e.timer < 0:
+            if e.timer < -1:
                 exp_to_remove.append(e)
 
         for e in exp_to_remove:
