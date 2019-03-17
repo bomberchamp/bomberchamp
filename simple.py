@@ -70,15 +70,15 @@ def explosion_spread_xy(x, y):
     elements=set()
     for i in range(len(x_spread)):
         if (x_spread[i], x_spread_y[i]) not in elements:
-            elements.add((x_spread[i], x_spread_y[i]))
+            elements.add((int(x_spread[i]), int(x_spread_y[i])))
     for i in range(len(y_spread)):
         if (y_spread_x[i], y_spread[i]) not in elements:
-            elements.add((y_spread_x[i], y_spread[i]))
+            elements.add((int(y_spread_x[i]), int(y_spread[i])))
 
     return elements
 
 
-def play_replay(replay, get_x, action_y_map):
+def play_replay(replay, get_x, action_y_map, **kwargs):
     arena = np.copy(replay['arena'])
     coins = np.zeros(arena.shape)
     coinlist = replay['coins']
@@ -92,26 +92,32 @@ def play_replay(replay, get_x, action_y_map):
 
     Xs = []
     ys = []
+    rs = []
+    agent_assigment = []
 
-    game = Game(arena, coins, agents)
+    game = Game(arena, coins, agents, **kwargs)
     
     for i in range(replay['n_steps']):
         permutation = permutations[i]
+        agent_Xs = {}
         agent_actions = {}
 
         for agent in game.agents:
             _, _, name, _, _ = agent
+            agent_Xs[name] = get_x(game.get_game_state(agent))
             agent_actions[name] = actions[name][i]
 
-            Xs.append(get_x(game.get_game_state(agent)))
+
+        rewards = game.step(agent_actions, permutation)
+
+        for name in agent_actions.keys():
+            Xs.append(agent_Xs[name])
             ys.append(action_y_map[agent_actions[name]])
-
-
-        game.step(agent_actions, permutation)
-
-        
+            rs.append(rewards[name])
+            agent_assignment[name]
+    
     #print(game.score)
-    return Xs, ys
+    return Xs, ys, rs, agent_assignment
 
 
 class Game:
@@ -233,9 +239,9 @@ class Game:
 
 
         for e in self.exp:
-            np.sum(boxes_hit[np.array(list(e.coords)).astype(int)])
+            box_count = np.sum(boxes_hit[tuple(zip(*e.coords))])
             _, _, name, _, _ = e.owner
-            step_score[name] += self.aux_reward_crates
+            step_score[name] += self.aux_reward_crates * box_count
 
 
         agents_hit = set()
