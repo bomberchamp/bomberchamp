@@ -78,7 +78,7 @@ def explosion_spread_xy(x, y):
     return elements
 
 
-def play_replay(replay, get_x):
+def play_replay(replay, get_x, action_y_map):
     arena = np.copy(replay['arena'])
     coins = np.zeros(arena.shape)
     coinlist = replay['coins']
@@ -91,7 +91,6 @@ def play_replay(replay, get_x):
         coins[coinlist[i][0], coinlist[i][1]] = 1
 
     Xs = []
-    action_y_map = {action: i for (i, action) in enumerate(s.actions)}
     ys = []
 
     game = Game(arena, coins, agents)
