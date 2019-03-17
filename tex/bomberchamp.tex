@@ -12,6 +12,62 @@
 \date{today}
 \begin{document}
 
+
+
+
+
+\section{Introduction}
+% Introduction
+% we implemented a rainbow dqn
+
+\subsection{Reinforcement Learning}
+% Reinforcement Learning basics a
+\subsection{Neural Networks}
+% basics j
+
+\section{DQN}
+% a
+
+\section{Rainbow / DQN Extensions}
+\subsection{Double DQN} % a
+\subsection{Dueling DQN} % a
+\subsection{Prioritized Replay Buffer} % a
+\subsection{Noisy} % a
+\subsection{Multi-Step Learning} % j
+% 
+
+\section{Other things}
+\subsection{Augmented data}
+\subsection{Centring of agent} % j / a
+\subsection{Invalid actions} % 
+\subsection{Auxilliary Reward Design}
+\subsection{Minigame Collection} % j
+\subsection{Self-Play (maybe)}
+
+\section{Observation}
+\subsection{It does not work}
+% nothing works
+% solution: make it better
+\subsection{Network scaling} % j
+% different networks from minigame to full game
+% lots of graphs
+
+% our learning process
+
+
+\section{Summary and Improvements}
+% improvements: distributional DQN, train for 3 months
+
+% improvement of game setup: j
+% - make provided framework easy to use
+% -- currently main.py, settings.py and possibly callbacks.py has to be changed for a simple switch between train and test mode
+% -- separate rendering and environment, so that the environment can be called from e.g. a jupyter notebook
+% -- provide main.py or python notebook 
+
+
+
+
+
 \section{Model}
 In reinforcement learning, an agent needs to learn how to act optimally in sequential decision making problems by maximizing a reward signal. This means, that the agent is provided with some kind of input state and then needs to choose an action. The subsequent state, depends on the chosen action and the input state. This subsequent state as well as an reward based on how well the agent performed is given back to the agent. To find a good policy on how to act, the agent needs to optimize these rewards.
 The true value of an action under a chosen policy is defined as the sum of the current reward for that action and the discounted future rewards:
