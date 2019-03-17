@@ -11,7 +11,7 @@ from copy import copy
 class expl():
     def __init__(self, owner, coords, bomb):
         self.owner=owner
-        self.timer=4
+        self.timer=s.bomb_timer + 1
         self.coords=coords
         self.bomb=bomb
         
@@ -93,7 +93,7 @@ def play_replay(replay, get_x, action_y_map, **kwargs):
     Xs = []
     ys = []
     rs = []
-    agent_assigment = []
+    agent_assignment = []
 
     game = Game(arena, coins, agents, **kwargs)
     
@@ -114,7 +114,7 @@ def play_replay(replay, get_x, action_y_map, **kwargs):
             Xs.append(agent_Xs[name])
             ys.append(action_y_map[agent_actions[name]])
             rs.append(rewards[name])
-            agent_assignment[name]
+            agent_assignment.append(name)
     
     #print(game.score)
     return Xs, ys, rs, agent_assignment
@@ -191,7 +191,7 @@ class Game:
         if permutation is None:
             permutation = np.random.permutation(len(self.agents))
 
-        step_score = {n: 0 for _,_,n,_,_ in self.agents}
+        step_score = {n: 0 for n in self.score.keys()}
 
         # Agents
         for j in range(len(self.agents)):
@@ -274,14 +274,20 @@ class Game:
 
         self.explosions = np.maximum(np.zeros(self.explosions.shape), self.explosions-1)
         
+        exp_to_remove = []
+        for e in self.exp:
+            e.timer -= 1
+            if e.timer < 0:
+                exp_to_remove.append(e)
+
+        for e in exp_to_remove:
+            self.exp.remove(e)
+
+
         for a in agents_hit:
             _, _, n, _, _ = a
             step_score[n] -= s.reward_kill
             self.agents.remove(a)
-        for e in self.exp:
-            e.timer-=1
-            if e.timer<=-3:
-                self.exp.remove(e)
 
         if len(self.agents) == 0 or self.steps >= 400 or (np.all(self.arena != 1) and np.all(self.coins == 0)):
             self.terminated = True
