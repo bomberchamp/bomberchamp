@@ -132,7 +132,6 @@ class Game:
        
         self.explosions = np.zeros(arena.shape)
 
-        self.explosions_at=np.array([set(),set(),set(),set()])
         self.exp=[]
         self.score=dict()
 
@@ -266,11 +265,7 @@ class Game:
                 #else:
                     #print('suicide')
                 agents_hit.add(self.agents[j])
-    
-            for a in range(len(self.arena)):
-                for b in range(len(self.arena)):
-                    if self.explosions[a,b]>1:
-                        self.explosions_at[j].discard((a,b))
+
 
         self.explosions = np.maximum(np.zeros(self.explosions.shape), self.explosions-1)
         
