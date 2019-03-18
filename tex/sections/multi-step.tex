@@ -1,0 +1,14 @@
+%!TEX root = ../bomberchamp.tex
+We are trying to learn the total discounted return
+$$Q^{*}(x_t, a_t)=R(x_t, a_t)+\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$$
+
+If we assume that we use the optimal policy for $t+1$ onward, we can substitute $\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$ with $Q^{*}(x_{t+1}, a*_{t+1}$.
+
+Q-Learning takes the reward from a single step and adds the discounted value estimate of the greedy action at the next step.
+
+$$\hat{Q}^{*}(x_t, a_t)=R(x_t, a_t)+\gamma \hat{Q}^{*}(x_{t+1}, a_{t+1})$$
+
+For multi-step Q-Learning we take the n-step truncated return
+$$R_{t}^{(n)} \equiv \sum_{k=0}^{n-1} \gamma_{t}^{(k)} R_{t+k+1}$$
+
+to estimate the
