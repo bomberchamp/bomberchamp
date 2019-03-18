@@ -105,13 +105,15 @@ class FullModel:
         responsible_weight = tf.batch_gather(o_out, action_holder)
         
         loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
-        tf.summary.scalar('loss', loss)
-        tf.summary.scalar('reward', tf.reduce_mean(reward_holder))
+
+        summaries = []
+        summaries.append(tf.summary.scalar('loss', loss))
+        summaries.append(tf.summary.scalar('reward', tf.reduce_mean(reward_holder)))
 
         optimizer = tf.train.AdamOptimizer(hp.learning_rate, epsilon=hp.adam_epsilon)
         update = optimizer.minimize(loss)
 
-        merged_summary = tf.summary.merge_all()
+        merged_summary = tf.summary.merge(summaries)
 
         self.summary = merged_summary
         self.train_writer = tf.summary.FileWriter(f'tf-board/train/{time.time()}',
