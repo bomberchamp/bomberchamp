@@ -16,6 +16,24 @@ from agent_code.tensor_agent.loss import weighted_huber_loss, huber_loss
 from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 
 
+class Counter:
+    def __init__(self, count=0):
+        self.count = count
+
+    def __iadd__(self, other):
+        self.count += other
+        return self.count
+
+    def __mod__(self, other):
+        return self.count % other
+
+    def __repr__(self):
+        return str(self.count)
+
+    def __int__(self):
+        return self.count
+
+
 def create_conv_net(shape):
     # Convolutional part of the network
     inputs = Input(shape=shape)
@@ -107,7 +125,7 @@ class FullModel:
         self.update_op = update
         self.weights = weight_holder
 
-        self.steps = 0
+        self.steps = Counter()
 
 
     def update(self, inputs, actions, rewards, per_weights):
