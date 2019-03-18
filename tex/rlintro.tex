@@ -6,9 +6,9 @@ For finding the optimal policy the state value function $V_\pi(s)$ can be used. 
 \begin{equation}
 V_\pi=\mathbb{E}\left[R\right].
 \end{equation}
-The expected reward $R$ for a given state s is defined as the sum of the current reward and the discounted future rewards
+The expected reward $R$ for a given state $s_0$ is defined as the sum of the current reward and the discounted future rewards
 \begin{equation}
-R=\sum^\infty_{t=0}\,\gamma^t\,R_t \textrm{ for } s=s_0.
+R=\sum^\infty_{t=0}\,\gamma^t\,R_t.
 \end{equation}
 $\gamma\:\epsilon\left[0,1\right]$ is the discount factor.\\
 The optimal policy $\pi^*$ maximizes the state-value function.

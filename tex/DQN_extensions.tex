@@ -29,9 +29,10 @@ P(i)=\frac{p_{i}^{\alpha}}{\sum_{k} p_{k}^{\alpha}}.
 Here $\alpha\,\epsilon\,[0,1]$ is another parameter which adjusts the amount of prioritization that is used. For $\alpha=0$ we get the uniform case (no prioritization), whereas $\alpha=1$ leads to greedy prioritization. \\
 Stochastic prioritization introduces bias to our model. This needs to be considered for updating the model, because it could change the solution the model is converging to \cite{DBLP:journals/corr/SchaulQAS15}. To correct this, importance sampling weights (IS weights) are introduced: 
 \begin{equation}
-w_{i}=\left(\frac{1}{N} \cdot \frac{1}{P(i)}\right)^{\beta}.
+w_{i}=\left(\frac{1}{N} \cdot \frac{1}{P(i)}\right)^{\beta},
 \end{equation}
-For $\beta=1$ the bias gets fully compensated. This is most important at the end of the training process. Therefore $\beta\,\epsilon\,[0,1]$ starts at an initial value and is then being annealed during training. \\\\
+with N being the replay buffer size and $\beta\,\epsilon\,[0,1]$ being a hyperparameter for  adjustment of the bias. 
+For $\beta=1$ the bias gets fully compensated. This is most important at the end of the training process. Therefore $\beta$ starts at an initial value and is then being annealed during training. \\\\
 An efficient data structure for the memory is crucial for good performance.
 To guarantee this, we implemented a sum tree to store the data, where searching is of complexity $O(1)$ and updating of complexity $O(\log N)$.
 A sum tree is a binary tree, in which the parent node values are the sum of the child node values. In our sum tree, the transition priorities were saved in the leave nodes. Therefore the root holds the total priority. An array was used to hold the associated data values to the priorities. For the purpose of sampling the total priority is divided into k priority ranges, with k being the number of experiences in one sample.
