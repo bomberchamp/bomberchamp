@@ -3,8 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-!tex/images/*
-
 *.png
 *.gif
 *.tar.gz
@@ -394,3 +392,6 @@ TSWLatexianTemp*
 *.glstex
 
 # End of https://www.gitignore.io/api/latex
+
+!tex/images/*
+
