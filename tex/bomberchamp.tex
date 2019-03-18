@@ -70,29 +70,15 @@
 
 
 \section{Model}
-In reinforcement learning, sequential decision making problems need to be solved by an agent. The agent is provided with some input state and then needs to choose an action. Input state and chosen action are used to create a subsequent state and a reward signal for the agent. By maximizing the reward signals the agent develops a policy for acting in the environment and thus gets better in solving the given problem. Finding the optimal policy is the goal of reinforcement learning.
-Hereby the environment is fully characterized by the state. \\
-Time is discrete in reinforcement learning. Therefore the consecutive states form a chain.
-Nevertheless transitions from one state to its subsequent state are not dependent on history, they only depend on the current state. This is called the Markov assumption. \\
-For finding the optimal policy the state value function $V_\pi(s)$ can be used. It is defined as the expected reward of a policy $\pi$ that can be reached by starting at the state s
-\begin{equation}
-V_\pi=\mathbb{E}\left[R\right].
-\end{equation}
-The expected reward $R$ for a given state s is defined as the sum of the current reward and the discounted future rewards
-\begin{equation}
-R=\sum^\infty_{t=0}\,\gamma^t\,R_t \textrm{ for all } s=s_0.
-\end{equation}
-$\gamma\:\epsilon\left[0,1\right]$ is the discount factor.\\
-The optimal policy $\pi^*$ maximizes the state-value function.
 
 
+\subsection{Q-learning}
 The true value of an action under a chosen policy is defined as the sum of the current reward for that action and the discounted future rewards:
 \begin{equation}
 Q_\pi(s,a)= E\left[\sum_{n=1}^{\infty} \gamma^{n-1}R_n^n\right] \Bigg|_{a,s,\pi}.
 \end{equation} 
 $\gamma\,\epsilon\,[0,1]$ denotes the discounting factor.
 The best policy is then determined by maximizing $Q_\pi$ over the actions in every step.
-\subsection{Q-learning}
 Usually it is not possible to learn every action for every state explicitly because the problems are often to extensive. Therefore The Q-values get approximated by a parametrized function $Q(a,s,\theta_t)$. Which is updated towards the target value $Y_{t}^{\mathrm{Q}}$:
 \begin{equation}
 Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(S_{t+1}, a ; \boldsymbol{\theta}_{t}\right)
@@ -173,7 +159,7 @@ The idea behind duelling networks is, that for some states it is irrelevant whic
 Consider a small toy problem: Our agent needs to catch coins which are falling down form above, he can either move right or left or wait to catch them. The coins are falling randomly. Sometimes there are no coins falling down at all in one state. In this state it is not important which action is chosen, whereas for other states its is.
 \begin{figure}
 \centering
-\includegraphics[scale=0.5]{dueling.png}
+\includegraphics[scale=0.5]{./images/dueling.png}
 \caption{Top: Standard Deep Q-network. Bottom: Dueling DQN with two separate streams.\cite{DBLP:journals/corr/WangFL15}}
 \label{fig: dueling}
 \end{figure}
