@@ -21,6 +21,7 @@
 % we implemented a rainbow dqn
 
 \subsection{Reinforcement Learning}
+\input{rlintro}
 % Reinforcement Learning basics a
 \subsection{Neural Networks}
 % basics j
@@ -69,7 +70,22 @@
 
 
 \section{Model}
-In reinforcement learning, an agent needs to learn how to act optimally in sequential decision making problems by maximizing a reward signal. This means, that the agent is provided with some kind of input state and then needs to choose an action. The subsequent state, depends on the chosen action and the input state. This subsequent state as well as an reward based on how well the agent performed is given back to the agent. To find a good policy on how to act, the agent needs to optimize these rewards.
+In reinforcement learning, sequential decision making problems need to be solved by an agent. The agent is provided with some input state and then needs to choose an action. Input state and chosen action are used to create a subsequent state and a reward signal for the agent. By maximizing the reward signals the agent develops a policy for acting in the environment and thus gets better in solving the given problem. Finding the optimal policy is the goal of reinforcement learning.
+Hereby the environment is fully characterized by the state. \\
+Time is discrete in reinforcement learning. Therefore the consecutive states form a chain.
+Nevertheless transitions from one state to its subsequent state are not dependent on history, they only depend on the current state. This is called the Markov assumption. \\
+For finding the optimal policy the state value function $V_\pi(s)$ can be used. It is defined as the expected reward of a policy $\pi$ that can be reached by starting at the state s
+\begin{equation}
+V_\pi=\mathbb{E}\left[R\right].
+\end{equation}
+The expected reward $R$ for a given state s is defined as the sum of the current reward and the discounted future rewards
+\begin{equation}
+R=\sum^\infty_{t=0}\,\gamma^t\,R_t \textrm{ for all } s=s_0.
+\end{equation}
+$\gamma\:\epsilon\left[0,1\right]$ is the discount factor.\\
+The optimal policy $\pi^*$ maximizes the state-value function.
+
+
 The true value of an action under a chosen policy is defined as the sum of the current reward for that action and the discounted future rewards:
 \begin{equation}
 Q_\pi(s,a)= E\left[\sum_{n=1}^{\infty} \gamma^{n-1}R_n^n\right] \Bigg|_{a,s,\pi}.

@@ -1,18 +1,3 @@
-\documentclass[12pt]{article}
-%\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
-\usepackage{graphicx}
-\usepackage[utf8]{inputenc}
-\usepackage{float}
-\usepackage{caption}
-\usepackage{amsmath}
-\usepackage[backend=biber]{biblatex}
-\usepackage{amssymb}
-\bibliography{literature.bib}
-
-\begin{document}
-
-
-
 In reinforcement learning, sequential decision making problems need to be solved by an agent. The agent is provided with some input state and then needs to choose an action. Input state and chosen action are used to create a subsequent state and a reward signal for the agent. By maximizing the reward signals the agent develops a policy for acting in the environment and thus gets better in solving the given problem. Finding the optimal policy is the goal of reinforcement learning.
 Hereby the environment is fully characterized by the state. \\
 Time is discrete in reinforcement learning. Therefore the consecutive states form a chain.
@@ -27,5 +12,3 @@ R=\sum^\infty_{t=0}\,\gamma^t\,R_t \textrm{ for } s=s_0.
 \end{equation}
 $\gamma\:\epsilon\left[0,1\right]$ is the discount factor.\\
 The optimal policy $\pi^*$ maximizes the state-value function.
-
-\end{document}
