@@ -15,6 +15,15 @@ from agent_code.tensor_agent.hyperparameters import hp
 from agent_code.tensor_agent.loss import weighted_huber_loss, huber_loss
 from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 
+from agent_code.tensor_agent.names import get_random_name
+
+writers = {}
+
+def getFileWriter(name='train', reset=False):
+    if name not in writers or reset:
+        writers[name] = tf.summary.FileWriter(f'tf-board/{name}/{time.time()}')
+
+    return writers[name]
 
 class Counter:
     def __init__(self, count=0):
@@ -81,7 +90,7 @@ def create_model(shape, D):
     return model, inputs, outputs
 
 class FullModel:
-    def __init__(self, input_shape, D):
+    def __init__(self, input_shape, D, family=None):
         self.input_shape = input_shape
         self.D = D
 
@@ -107,8 +116,12 @@ class FullModel:
         loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
 
         summaries = []
-        summaries.append(tf.summary.scalar('loss', loss))
-        summaries.append(tf.summary.scalar('reward', tf.reduce_mean(reward_holder)))
+        if family is None:
+            family = get_random_name()
+        self.family = family
+
+        summaries.append(tf.summary.scalar('loss', loss, family=family))
+        summaries.append(tf.summary.scalar('reward', tf.reduce_mean(reward_holder), family=family))
 
         optimizer = tf.train.AdamOptimizer(hp.learning_rate, epsilon=hp.adam_epsilon)
         update = optimizer.minimize(loss)
@@ -116,8 +129,7 @@ class FullModel:
         merged_summary = tf.summary.merge(summaries)
 
         self.summary = merged_summary
-        self.train_writer = tf.summary.FileWriter(f'tf-board/train/{time.time()}',
-                                      K.get_session().graph)
+        self.summary_frequency = 100
         
         self.errors=tf.abs(reward_holder-responsible_weight)
         self.input_ph = o_in
@@ -138,7 +150,9 @@ class FullModel:
             self.reward_ph:rewards,
             self.weights:per_weights
         })
-        self.train_writer.add_summary(summary, self.steps)
+        if (self.steps % self.summary_frequency == 0):
+            getFileWriter('train').add_summary(summary, self.steps)
+
         self.steps += 1
         return errors
 
