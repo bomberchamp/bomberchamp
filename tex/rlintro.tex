@@ -4,7 +4,7 @@ Time is discrete in reinforcement learning. Therefore the consecutive states for
 Nevertheless transitions from one state to its subsequent state are not dependent on history, they only depend on the current state. This is called the Markov assumption. \\
 For finding the optimal policy the state value function $V_\pi(s)$ can be used. It is defined as the expected reward of a policy $\pi$ that can be reached by starting at the state s
 \begin{equation}
-V_\pi=\mathbb{E}\left[R\right].
+V_\pi(s)=\mathbb{E}\left[R\right]|_{\pi,s}.
 \end{equation}
 The expected reward $R$ for a given state $s_0$ is defined as the sum of the current reward and the discounted future rewards
 \begin{equation}
