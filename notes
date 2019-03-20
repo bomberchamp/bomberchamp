@@ -3,3 +3,12 @@ difficulties:
 - Invalid actions -> solutions
 - agent is bored (no coins in sight) -> more coins
 - default reward >=0: stagnation -> changed to negative
+
+
+
+
+self-play:
+- randomized game settings (only coins, single player, crate_density, max game length)
+- different agent types (auxiliary rewards)
+- skill evaluation
+- playing against self and past versions (avoid strategy collapse)

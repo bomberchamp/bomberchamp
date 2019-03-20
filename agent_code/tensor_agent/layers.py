@@ -68,6 +68,10 @@ class NoisyDense(Layer):
 
         self.b = b_mu + b_sigma * b_epsilon
         
+        self.w_sigma = w_sigma
+        self.b_sigma = b_sigma
+        self.w_mu = w_mu
+        self.b_mu = b_mu
 
 
     def call(self, inputs, training=None):
