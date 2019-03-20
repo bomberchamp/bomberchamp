@@ -124,25 +124,30 @@ def play_replay(replay, get_x, action_y_map, **kwargs):
 def get_valid_actions(x, y, b, game):
     # choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
     valid = np.ones((6))
-    if not game.tile_is_free(x, y-1):
+    if not game.tile_is_free(x, y-1) or game.explosions[x, y-1] > 1:
         valid[2] = 0 # UP invalid
-    if not game.tile_is_free(x, y+1):
+    if not game.tile_is_free(x, y+1) or game.explosions[x, y+1] > 1:
         valid[3] = 0 # DOWN invalid
-    if not game.tile_is_free(x-1, y):
+    if not game.tile_is_free(x-1, y) or game.explosions[x-1, y] > 1:
         valid[1] = 0 # LEFT invalid
-    if not game.tile_is_free(x+1, y):
+    if not game.tile_is_free(x+1, y) or game.explosions[x+1, y] > 1:
         valid[0] = 0 # RIGHT invalid
     if b<1:
         valid[4] = 0
+
+    if np.any(valid[0:4]) and game.explosions[x, y] > 1:
+        valid[5] = 0
 
     return valid
 
 
 class Game:
-    def __init__(self, arena, coins, agents, aux_reward_crates=0):
+    def __init__(self, arena, coins, agents, aux_reward_crates=0, max_duration=400):
         self.arena = np.copy(arena)
         self.coins = np.copy(coins)
         self.agents = copy(agents)
+
+        self.max_duration = max_duration
 
         self.bombs = np.zeros(arena.shape)
        
@@ -159,7 +164,7 @@ class Game:
         self.terminated = False
 
     @staticmethod
-    def create_arena(agent_names, crate_density=s.crate_density):
+    def create_arena(agent_names, crate_density=s.crate_density, coins_per_area=1):
         # Arena with wall and crate layout
         arena = (np.random.rand(s.cols, s.rows) < crate_density).astype(int)
         arena[:1, :] = -1
@@ -186,11 +191,13 @@ class Game:
         for i in range(3):
             for j in range(3):
                 n_crates = (arena[1+5*i:6+5*i, 1+5*j:6+5*j] == 1).sum()
-                while True:
+                coins_placed = 0
+                while coins_placed < coins_per_area:
                     x, y = np.random.randint(1+5*i,6+5*i), np.random.randint(1+5*j,6+5*j)
                     if (n_crates == 0 and arena[x,y] == 0) or arena[x,y] == 1:
                         coins[x,y] = 1
-                        break
+                        n_crates -= 1
+                        coins_placed += 1
 
         # Distribute starting positions
         agents = []
@@ -313,7 +320,9 @@ class Game:
             events[n][ev.GOT_KILLED] += 1
             self.agents.remove(a)
 
-        if len(self.agents) == 0 or self.steps >= 400 or (np.all(self.arena != 1) and np.all(self.coins == 0)):
+        if len(self.agents) == 0 \
+        or self.steps >= self.max_duration \
+        or (np.all(self.arena != 1) and np.all(self.coins == 0) and len(self.agents) == 1):
             self.terminated = True
 
         for _, _, n, _, _ in self.agents:
