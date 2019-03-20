@@ -168,6 +168,13 @@ class FullModel:
         self.target.load_weights(file)
         print('weights loaded')
 
+    def set_weights(self, weights):
+        self.online.set_weights(weights)
+        self.target.set_weights(weights)
+
+    def get_weights(self):
+        return self.online.get_weights()
+
     def clone(self, share_target=True):
         clone = copy(self)
         if not share_target:

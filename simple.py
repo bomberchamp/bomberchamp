@@ -1,4 +1,5 @@
-from settings import s, e
+from settings import s
+from settings import e as ev
 import numpy as np
 import pickle
 
@@ -108,7 +109,7 @@ def play_replay(replay, get_x, action_y_map, **kwargs):
             agent_actions[name] = actions[name][i]
 
 
-        rewards = game.step(agent_actions, permutation)
+        rewards, _ = game.step(agent_actions, permutation)
 
         for name in agent_actions.keys():
             Xs.append(agent_Xs[name])
@@ -120,13 +121,28 @@ def play_replay(replay, get_x, action_y_map, **kwargs):
     return Xs, ys, rs, agent_assignment
 
 
+def get_valid_actions(x, y, b, game):
+    # choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
+    valid = np.ones((6))
+    if not game.tile_is_free(x, y-1):
+        valid[2] = 0 # UP invalid
+    if not game.tile_is_free(x, y+1):
+        valid[3] = 0 # DOWN invalid
+    if not game.tile_is_free(x-1, y):
+        valid[1] = 0 # LEFT invalid
+    if not game.tile_is_free(x+1, y):
+        valid[0] = 0 # RIGHT invalid
+    if b<1:
+        valid[4] = 0
+
+    return valid
+
+
 class Game:
     def __init__(self, arena, coins, agents, aux_reward_crates=0):
         self.arena = np.copy(arena)
         self.coins = np.copy(coins)
         self.agents = copy(agents)
-
-        self.aux_reward_crates = aux_reward_crates
 
         self.bombs = np.zeros(arena.shape)
        
@@ -191,6 +207,7 @@ class Game:
             permutation = np.random.permutation(len(self.agents))
 
         step_score = {n: 0 for n in self.score.keys()}
+        events = {n: {event: 0 for event in ev} for n in self.score.keys()}
 
         # Agents
         for j in range(len(self.agents)):
@@ -203,14 +220,23 @@ class Game:
                 self.bombs[x, y] = s.bomb_timer + 2
                 bombs_left = -s.bomb_timer - 1
                 self.exp.append(expl(agent,explosion_spread_xy(x,y),(x,y)))
-            if action == 'DOWN' and self.tile_is_free(x, y+1):
+                events[name][ev.BOMB_DROPPED] += 1
+            elif action == 'DOWN' and self.tile_is_free(x, y+1):
                 y += 1
-            if action == 'UP' and self.tile_is_free(x, y-1):
+                events[name][ev.MOVED_DOWN] += 1
+            elif action == 'UP' and self.tile_is_free(x, y-1):
                 y -= 1
-            if action == 'RIGHT' and self.tile_is_free(x+1, y):
+                events[name][ev.MOVED_UP] += 1
+            elif action == 'RIGHT' and self.tile_is_free(x+1, y):
                 x += 1
-            if action == 'LEFT' and self.tile_is_free(x-1, y):
+                events[name][ev.MOVED_RIGHT] += 1
+            elif action == 'LEFT' and self.tile_is_free(x-1, y):
                 x -= 1
+                events[name][ev.MOVED_LEFT] += 1
+            elif action == 'WAIT':
+                events[name][ev.WAITED] += 1
+            else:
+                events[name][ev.INVALID_ACTION] += 1
             
             bombs_left = np.minimum(bombs_left+1, 1)
             
@@ -221,6 +247,7 @@ class Game:
             x, y, name, bombs_left, score = self.agents[j]
             if self.coins[x,y]==1:
                 step_score[name]+=s.reward_coin
+                events[name][ev.COIN_COLLECTED] += 1
             self.coins[x,y]=0
         
             
@@ -240,7 +267,7 @@ class Game:
         for e in self.exp:
             box_count = np.sum(boxes_hit[tuple(zip(*e.coords))])
             _, _, name, _, _ = e.owner
-            step_score[name] += self.aux_reward_crates * box_count
+            events[name][ev.CRATE_DESTROYED] += box_count
 
 
         agents_hit = set()
@@ -262,8 +289,10 @@ class Game:
                 if name_k!=name:
                     #print('bombed by', name_k)
                     step_score[name_k]+=s.reward_kill
-                #else:
+                    events[name_k][ev.KILLED_OPPONENT] += 1
+                else:
                     #print('suicide')
+                    events[name_k][ev.KILLED_SELF] += 1
                 agents_hit.add(self.agents[j])
 
 
@@ -281,16 +310,16 @@ class Game:
 
         for a in agents_hit:
             _, _, n, _, _ = a
-            step_score[n] -= s.reward_kill
+            events[n][ev.GOT_KILLED] += 1
             self.agents.remove(a)
 
         if len(self.agents) == 0 or self.steps >= 400 or (np.all(self.arena != 1) and np.all(self.coins == 0)):
             self.terminated = True
 
         for _, _, n, _, _ in self.agents:
-            self.score[n] = step_score[n]
+            self.score[n] += step_score[n]
 
-        return step_score
+        return step_score, events
 
 
     def get_state(self, agent):
