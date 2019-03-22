@@ -113,7 +113,7 @@ class FullModel:
         # applies a mask to the outputs so that only the prediction for the chosen action is considered
         responsible_weight = tf.batch_gather(o_out, action_holder)
         
-        loss = weighted_huber_loss(reward_holder, responsible_weight, weight_holder)
+        loss = tf.losses.huber_loss(reward_holder, responsible_weight, weight_holder)
 
         summaries = []
         if family is None:
