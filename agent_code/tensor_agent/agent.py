@@ -116,7 +116,7 @@ class TensorAgent:
         self.ms_buffer = MultiStepBuffer()
 
 
-    def act(self, X, train=False, valid_actions=None, p=None):
+    def act(self, X, train=False, valid_actions=None, p=None, game_state=None):
         
         if hp.valid==False:
                 valid_actions=None
