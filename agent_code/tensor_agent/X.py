@@ -153,7 +153,7 @@ class AbsoluteX3:
             X[others[i][0], others[i][1], 3] = 1 + (others[i][3] > 0)
         
         for i in range(len(bombs)):
-            X[bombs[i][0], bombs[i][1], 4] = 1 - bombs[i][2] / (s.bomb_timer)
+            X[bombs[i][0], bombs[i][1], 4] = 1 - bombs[i][2] / (s.bomb_timer+1)
         
         X[:,:,5] = np.maximum(explosions - 1, 0)
         
@@ -186,7 +186,7 @@ class RelativeX3:
             X[others[i][0], others[i][1], 2] = 1 + (others[i][3] > 0)
         
         for i in range(len(bombs)):
-            X[bombs[i][0], bombs[i][1], 3] = 1 - bombs[i][2] / (s.bomb_timer)
+            X[bombs[i][0], bombs[i][1], 3] = 1 - bombs[i][2] / (s.bomb_timer+1)
         
         X[:,:,4] = np.maximum(explosions - 1, 0)
         
