@@ -1,0 +1,3 @@
+observation:
+- crate destroying without negative reward for death works surprisingly well
+- crate destroying with negative reward for death learns well, but gets worse after about 600-800k steps (falls into UP-DOWN / RIGHT-LEFT loops)

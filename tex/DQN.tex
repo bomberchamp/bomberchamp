@@ -7,7 +7,7 @@ Q_\pi(s,a)=\mathbb{E}\left[R\right]|_{a,s,\pi}.
 The best policy is then determined by maximizing $Q_\pi$ over the actions in every step.
 %TODO why is this better than the state value function??
 Usually it is not possible to learn every action for every state explicitly because the problems are often to extensive. Therefore the Q-values get approximated by a parametrized function $Q(s,a,\theta_t)$ with $\theta_t$ being the parameters. The Q-function is then updated towards the target value
-\begin{equation}Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(s_{t+1}, a , \theta_{t}\right)
+\begin{equation}\label{eq:Q-target}Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(s_{t+1}, a , \theta_{t}\right)
 \end{equation}
 after each action via:
 \begin{equation}

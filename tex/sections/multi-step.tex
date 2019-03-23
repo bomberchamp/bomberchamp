@@ -1,26 +1,14 @@
 %!TEX root = ../bomberchamp.tex
-In reinforcement learning, the reward for a given policy $\pi$ and state $s_{t=0}$ is the discounted return for all future actions. Since $V_\pi(s_t)$ is the expected return for $s_{t}$, we can use the corrected $n$-step truncated return 
+
+In standard Q-Learning, the Q-function is updated with a single reward $R_{t+1}$ and the $Q$ value estimate for $s_{t+1}$ \eqref{eq:Q-target}.
+This can be extended to multi-step targets\cite{Sutton1988} by accumulating the rewards $R_{t+1},\dots,R_{t+n}$ and the $Q$ value estimate for $s_{t+n+1}$. We get the target
 \begin{equation}
-R_t^{(n)}=\sum^{n-1}_{k=0}\,\gamma^k\,R_{t+k+1} + V_\pi(s_n)
-\end{equation}.
+Y_{t}^{\text { Multi-Step Q }} \equiv \sum_{k=0}^{n-1} \gamma^k R_{t+k+1}+\gamma^n \max _{a} Q\left(s_{t+n}, a ; \theta\right).
+\end{equation}
+When combined with the Double DQN target \eqref{eq:DDQN-target}, we get 
 
-Q-Learning takes the reward $R(s_t, a_t)$ from a single step and uses the state value estimate $\hat{V}_\pi(s_{t+1})$ of the next step. If we take the greedy action $a*_{t+1}$ at $s_{t+1}$, we get $\hat{V}_\pi(s_{t+1})=\hat{Q}^{*}(s_{t+1}, a^{*}_{t+1})=\max_a\hat{Q}^{*}(s_{t+1}, a)$
+\begin{equation}
+Y_{t}^{\text { Multi-Step Q }} \equiv \sum_{k=0}^{n-1} \gamma^k R_{t+k+1}+\gamma^n Q\left(s_{t+n}, \underset{a}{\operatorname{argmax}} Q\left(s_{t+n}, a ; \theta\right); \theta^{-}\right).
+\end{equation}
 
-$$\hat{Q}^{*}(s_t, a_t)=R(s_t, a_t)+\gamma \hat{Q}^{*}(s_{t+1}, a_{t+1})$$
-
-For multi-step Q-Learning we take the n-step truncated return
-$$R_{t}^{(n)} \equiv \sum_{k=0}^{n-1} \gamma_{t}^{(k)} R_{t+k+1}$$
-
-to estimate the
-
-
-
-
-
-
-
-In Q-Learning we are trying to estimate the expected total discounted return [LINK TO DISCOUNTED RETURN IN INTRO] given a state $s$ and action $a$.
-
-$$Q^{*}(x_t, a_t)=R(x_t, a_t)+\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$$
-
-If we assume that we use the optimal policy for $t+1$ onward, we can substitute $\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$ with $Q^{*}(x_{t+1}, a*_{t+1}$.
+Q-Learning is thereby similar to multi-step Q-Learning with $n=1$. Higher $n$ lead to faster propagation of reward information to previous time steps which can be useful or even a necessity if the rewards are sparse over a long number of time steps. On the other hand $Q$ may not be able to approach the correct $Q*$ values for an arbitrary policy\cite{Peng1996}. So a fine-tuned $n$ can lead to faster learning.
