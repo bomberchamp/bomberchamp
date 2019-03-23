@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*-tex.pdf
+*.pdf_tex
 *.png
 *.gif
 *.tar.gz
