@@ -251,16 +251,14 @@ class SuperMinimal:
         return centered_X
 
 
-def X3_to_imgs(X, a=True):
+def X3_to_imgs(X, a=True, alpha=1, whitening=0):
     imgs = []
     combined = np.zeros((X.shape[0], X.shape[0], 4))
     combined[:,:,3] = 1
     def append(img):
         combined[:,:,0:3] += img[:,:,0:3]
         combined[:,:,0:3] = np.clip(combined[:,:,0:3], 0, 1)
-        return imgs.append(Image.fromarray(np.uint8(img*255)).resize((17*10,17*10)))
-
-    alpha = 1
+        return imgs.append(Image.fromarray(np.uint8(np.clip(img*255+whitening, 0, 255))).resize((17*10,17*10)))
 
     def to_img(X, rgb, div = 1):
         img = np.zeros((X.shape[0], X.shape[0], 4))
