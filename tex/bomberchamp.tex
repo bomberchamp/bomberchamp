@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
 %\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{graphicx}
+\usepackage{svg}
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage{caption}
@@ -8,7 +9,9 @@
 \usepackage[backend=biber]{biblatex}
 \usepackage{amssymb}
 \usepackage{hyperref}
-\usepackage{caption}
+\usepackage{subcaption}
+\newsavebox{\largestimage}
+
 \bibliography{literature.bib}
 \title{Machine Learning: Final project bomberchamp}
 \date{today}
@@ -41,9 +44,11 @@
 \input{sections/multi-step}
 
 \section{Other things}
+\subsection{Feature space}
+\input{sections/feature_space}
 \subsection{Augmented data}   %a
 \input{augmented}
-\subsection{Centring of agent} % j / a
+% inside general seciton about input space \subsection{Centring of agent} % j / a
 \subsection{Invalid actions} % 
 \input{sections/invalid-actions}
 \subsection{Auxilliary Reward Design}
@@ -59,6 +64,11 @@
 % different networks from minigame to full game
 % lots of graphs
 
+\begin{figure}
+  \centering
+  \includesvg{images/network-arch}
+  \caption{Network architecture}
+\end{figure}
 % our learning process
 
 
@@ -81,9 +91,6 @@
 
 \section{Training process}
 
-
-\subsection{Centring of the agent}
-To simplify learning for our agent, it was centred on the board, so that it stays at a fixed position while the environment (coins, crates, other agents) move around it. This is very common in the Atari games on which most implementations of DQN agents are tested, including the Rainbow agent without distributional reinforcement learning from which we took most of our initial hyper parameters. Therefore we thought, a more similar setting would be beneficial to our agent. To implement this, the size of the board was increased to four times its original size and the agent placed in the middle of the new board.
 \subsection{Self play}
 %TODO how was it implemented etc
 For training purposes a simple agent implementation that follows the rules of bomberman and plays reasonably well was provided.
