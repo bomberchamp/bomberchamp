@@ -1,14 +1,26 @@
 %!TEX root = ../bomberchamp.tex
-We are trying to learn the total discounted return
-$$Q^{*}(x_t, a_t)=R(x_t, a_t)+\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$$
+In reinforcement learning, the reward for a given policy $\pi$ and state $s_{t=0}$ is the discounted return for all future actions. Since $V_\pi(s_t)$ is the expected return for $s_{t}$, we can use the corrected $n$-step truncated return 
+\begin{equation}
+R_t^{(n)}=\sum^{n-1}_{k=0}\,\gamma^k\,R_{t+k+1} + V_\pi(s_n)
+\end{equation}.
 
-If we assume that we use the optimal policy for $t+1$ onward, we can substitute $\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$ with $Q^{*}(x_{t+1}, a*_{t+1}$.
+Q-Learning takes the reward $R(s_t, a_t)$ from a single step and uses the state value estimate $\hat{V}_\pi(s_{t+1})$ of the next step. If we take the greedy action $a*_{t+1}$ at $s_{t+1}$, we get $\hat{V}_\pi(s_{t+1})=\hat{Q}^{*}(s_{t+1}, a^{*}_{t+1})=\max_a\hat{Q}^{*}(s_{t+1}, a)$
 
-Q-Learning takes the reward from a single step and adds the discounted value estimate of the greedy action at the next step.
-
-$$\hat{Q}^{*}(x_t, a_t)=R(x_t, a_t)+\gamma \hat{Q}^{*}(x_{t+1}, a_{t+1})$$
+$$\hat{Q}^{*}(s_t, a_t)=R(s_t, a_t)+\gamma \hat{Q}^{*}(s_{t+1}, a_{t+1})$$
 
 For multi-step Q-Learning we take the n-step truncated return
 $$R_{t}^{(n)} \equiv \sum_{k=0}^{n-1} \gamma_{t}^{(k)} R_{t+k+1}$$
 
 to estimate the
+
+
+
+
+
+
+
+In Q-Learning we are trying to estimate the expected total discounted return [LINK TO DISCOUNTED RETURN IN INTRO] given a state $s$ and action $a$.
+
+$$Q^{*}(x_t, a_t)=R(x_t, a_t)+\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$$
+
+If we assume that we use the optimal policy for $t+1$ onward, we can substitute $\gamma R(x_{t+1}, a_{t+1})+\gamma^2 R(x_{t+2}, a_{t+2}) + ...$ with $Q^{*}(x_{t+1}, a*_{t+1}$.
