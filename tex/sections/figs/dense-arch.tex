@@ -1,0 +1,38 @@
+%!TEX root = ../bomberchamp.tex
+
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+	\begin{tabular}{l l l}
+		\multicolumn{3}{c}{Shared network} \\
+		\midrule
+		Dense & 64 units & relu \\
+		Dense & 64 units & relu \\
+		\toprule
+		\multicolumn{3}{c}{Advantage / value stream} \\
+		\midrule
+		NoisyDense & 64 units & relu \\
+		\toprule
+	\end{tabular}
+    \caption{Dense 64}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+	\begin{tabular}{l l l}
+		\multicolumn{3}{c}{Shared network} \\
+		\midrule
+		Dense & 256 units & relu \\
+		Dense & 256 units & relu \\
+		\toprule
+		\multicolumn{3}{c}{Advantage / value stream} \\
+		\midrule
+		NoisyDense & 256 units & relu \\
+		\toprule
+	\end{tabular}
+    \caption{Dense 256}
+  \end{subfigure}
+  \caption{Simple fully connected (dense) network. The last value and advantage stream layer is omitted.}
+  \label{fig:dense-arch}
+\end{figure}

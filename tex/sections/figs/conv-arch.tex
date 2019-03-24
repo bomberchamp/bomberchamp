@@ -1,0 +1,45 @@
+%!TEX root = ../bomberchamp.tex
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+	\begin{tabular}{l l l l l}
+		\multicolumn{5}{c}{Shared network} \\
+		\midrule
+		& $n_c$ & $f$ & $s$ & \\
+		\midrule
+		Conv2D & 32 & 8 & 4 & relu \\
+		Conv2D & 64 & 4 & 2 & relu \\
+		Conv2D & 64 & 3 & 1 & relu \\
+		\toprule
+		\multicolumn{5}{c}{Advantage / value stream} \\
+		\midrule
+		NoisyDense & \multicolumn{3}{l}{512 units} & relu \\
+		\toprule
+	\end{tabular}
+    \caption{Conv from Rainbow paper\cite{Hessel2018RainbowCI}}
+    \label{fig:conv-original}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+	\begin{tabular}{l l l l l}
+		\multicolumn{5}{c}{Shared network} \\
+		\midrule
+		& $n_c$ & $f$ & $s$ & \\
+		\midrule
+		Conv2D & 32 & 1 & 1 & relu \\
+		Conv2D & 64 & 4 & 2 & relu \\
+		Conv2D & 64 & 3 & 2 & relu \\
+		\toprule
+		\multicolumn{5}{c}{Advantage / value stream} \\
+		\midrule
+		NoisyDense & \multicolumn{3}{l}{512 units} & relu \\
+		\toprule
+	\end{tabular}
+    \caption{Modified convolutional NN}
+    \label{fig:conv-modified}
+  \end{subfigure}
+  \caption{Convolutional network with number of channels $n_c$, filter size $f$ and stride $s$. The last value and advantage stream layer is omitted.}
+  \label{fig:conv-arch}
+\end{figure}
