@@ -6,8 +6,8 @@ Q_\pi(s,a)=\mathbb{E}\left[R\right]|_{a,s,\pi}.
 \end{equation} 
 The best policy is then determined by maximizing $Q_\pi$ over the actions in every step.
 %TODO why is this better than the state value function??
-Usually it is not possible to learn every action for every state explicitly because the problems are often to extensive. Therefore the Q-values get approximated by a parametrized function $Q(s,a,\theta_t)$ with $\theta_t$ being the parameters. The Q-function is then updated towards the target value
-\begin{equation}\label{eq:Q-target}Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(s_{t+1}, a , \theta_{t}\right)
+Usually it is not possible to learn every action for every state explicitly because the problems are often to extensive. Therefore the Q-values get approximated by a parametrized function $Q(s,a;\theta_t)$ with $\theta_t$ being the parameters. The Q-function is then updated towards the target value
+\begin{equation}\label{eq:Q-target}Y_{t}^{\mathrm{Q}} \equiv R_{t+1}+\gamma \max _{a} Q\left(s_{t+1}, a ; \theta_{t}\right)
 \end{equation}
 after each action via:
 \begin{equation}
@@ -21,7 +21,7 @@ For some reinforcement learning problems, the simplest implementation of the Q-l
 If we consider more complicated problems with bigger inputs other methods are needed. For state of the art reinforcement learning, usually neural networks are being used.
 They are especially convenient as they are trained from raw inputs, which makes handcrafted features redundant \cite{DBLP:journals/corr/MnihKSGAWR13}.
 Neural Networks which are implemented to learn with the Q-algorithm are called Q-networks.
-They are non linear function approximations for $Q(s,a,\theta_t)$.
+They are non linear function approximations for $Q(s,a;\theta_t)$.
 To update the Q-network the loss function
 \begin{equation}
 L_{t}\left(\theta_{t}\right)=\mathbb{E}_{s, a \sim \rho(s,a)}\left[\left(Y_{t}^{\mathrm{Q}}-Q\left(s, a ; \theta_{t}\right)\right)^{2}\right]
