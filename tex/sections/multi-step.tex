@@ -8,7 +8,7 @@ Y_{t}^{\text { Multi-Step Q }} \equiv \sum_{k=0}^{n-1} \gamma^k R_{t+k+1}+\gamma
 When combined with the Double DQN target \eqref{eq:DDQN-target}, we get 
 
 \begin{equation}
-Y_{t}^{\text { Multi-Step DDQN }} \equiv \sum_{k=0}^{n-1} \gamma^k R_{t+k+1}+\gamma^n Q\left(s_{t+n}, \underset{a}{\operatorname{argmax}} Q\left(s_{t+n}, a ; \theta\right); \theta^{-}\right).
+Y_{t}^{\text { Multi-Step DDQN }} \equiv \sum_{k=0}^{n-1} \gamma^k R_{t+k+1}+\gamma^n Q\left(s_{t+n}, \underset{a}{\operatorname{argmax}}\; Q\left(s_{t+n}, a ; \theta\right); \theta^{-}\right).
 \end{equation}
 
 Q-Learning is thereby similar to multi-step Q-Learning with $n=1$. Higher $n$ lead to faster propagation of reward information to previous time steps which can be useful or even a necessity if the rewards are sparse over a long number of time steps. On the other hand $Q$ may not be able to approach the correct $Q*$ values for an arbitrary policy\cite{Peng1996}. So a fine-tuned $n$ can lead to faster learning.

@@ -7,7 +7,7 @@ The online network is used to select an action from the action choices via maxim
 The resulting double DQN yields more accurate values and hence leads to better policies than DQN \cite{DBLP:journals/corr/HasseltGS15}.
 Updating double DQNs is similar to updating DQNs when the target is rewritten as:
 \begin{equation}\label{eq:DDQN-target}
-Y_{t}^{\text { Double DQN }} \equiv R_{t+1}+\gamma Q\left(s_{t+1}, \underset{a}{\operatorname{argmax}} Q\left(s_{t+1}, a ; \theta_{t}\right); \theta_{t}^{-}\right).
+Y_{t}^{\text { Double DQN }} \equiv R_{t+1}+\gamma Q\left(s_{t+1}, \underset{a}{\operatorname{argmax}}\; Q\left(s_{t+1}, a ; \theta_{t}\right); \theta_{t}^{-}\right).
 \end{equation}
 $\theta_{t}^{-}$ and $\theta_{t}$ are the weights of the target and online network respectively.
 \subsection{Prioritized Experience Replay}
