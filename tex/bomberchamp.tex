@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage[backend=biber]{biblatex}
 \usepackage{amssymb}
+\usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{subcaption}
 \newsavebox{\largestimage}
@@ -43,7 +44,7 @@
 % 
 \input{sections/multi-step}
 
-\section{Other things}
+\section{Training}
 \subsection{Feature space}
 \input{sections/feature_space}
 \subsection{Augmented data}   %a
@@ -53,8 +54,13 @@
 \input{sections/invalid-actions}
 \subsection{Auxilliary Reward Design}
 \input{sections/aux-rewards}
-\subsection{Minigame Collection} % j
+\subsection{Minigames} % j
+\input{sections/minigame}
+\subsection{Network Architecture}
+\input{sections/network-arch}
 \subsection{Self-Play} % j
+\input{sections/self-play}
+
 
 \section{Observation}
 \subsection{It does not work}
@@ -74,6 +80,8 @@
 
 \section{Summary and Improvements}
 % improvements: distributional DQN, train for 3 months
+% steps/own bomb in feature space
+% RNN (or other things able to capture hidden state), hidden states: time until next bomb of agents, who owns which bomb
 
 % improvement of game setup: j
 % - make provided framework easy to use

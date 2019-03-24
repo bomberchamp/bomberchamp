@@ -1,0 +1,9 @@
+%!TEX root = ../bomberchamp.tex
+
+\label{ch:minigame}
+As even the seemingly simple task of collecting coins in the bomberman arena can be challenging, we made an even simpler minigame. The minigame consists of collecting coins on an otherwise empty arena. Consequently, the feature space is $X\in\left\{0,1\right\}^{w\times h \times 1}$ and we can limit the actions to movement in the directions that do not lead outside the arena. We can also vary $w$, $h$ and the number of coins $n_{\text{coins}}$ to see how a network is affected by the arena size and coin count.
+
+The game is terminated when all coins have been collected or after a certain duration which is calculated as $$T_{max}=(w+h)*n_{\text{coins}}.$$
+This is done to ensure that every coin can be collected, but there is a time limit to collect them.
+
+Having this minigame helped us debug our reinforcement learning agent and find a suitable network for the next task.

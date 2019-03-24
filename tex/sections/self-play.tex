@@ -1,0 +1,4 @@
+%!TEX root = ../bomberchamp.tex
+
+We use self-play to train the agent in a four player free-for-all environment. The agent plays against itself, a past version of itself or the heuristic \emph{simple\_agent}. Since the players use the same model, the experiences for the current players can be saved in a shared experience replay buffer. The \emph{simple\_agent} experiences also get saved in the buffer with the $Q$ value estimation being calculated with the current player model. The past versions only serve as opponents with no data added to the buffer.
+

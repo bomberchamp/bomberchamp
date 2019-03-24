@@ -121,7 +121,7 @@ def play_replay(replay, get_x, action_y_map, **kwargs):
     return Xs, ys, rs, agent_assignment
 
 
-def get_valid_actions(x, y, b, game):
+def get_valid_actions(x, y, b, game, prevent_death=True):
     # choices = ['RIGHT', 'LEFT', 'UP', 'DOWN', 'BOMB', 'WAIT']
     valid = np.ones((6))
     if not game.tile_is_free(x, y-1) or game.explosions[x, y-1] > 1:
@@ -135,7 +135,7 @@ def get_valid_actions(x, y, b, game):
     if b<1:
         valid[4] = 0
 
-    if np.any(valid[0:4]) and game.explosions[x, y] > 1:
+    if prevent_death and np.any(valid[0:4]) and game.explosions[x, y] > 1:
         valid[5] = 0
 
     return valid
