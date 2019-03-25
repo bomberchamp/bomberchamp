@@ -1,6 +1,6 @@
 %!TEX root = ../bomberchamp.tex
 
-As regression model we use a neural network, consisting of multiple layers of fully connected and convolutional layers. A fully connected layer can be represented as
+As regression model we use a neural network, consisting of multiple fully connected and convolutional layers. A fully connected layer can be represented as
 \begin{equation}
 y = w x+b,
 \end{equation}
@@ -13,7 +13,7 @@ y & y > 0 \\
 \end{equation}
 more complex functions can be approximated.
 
-Instead of fully connected layers, convolutional layers can be used to process images or other spatially connected inputs. Each convolutional layer takes an input of size $w\times h \times c$ and generates an output of size $\frac{w-f+2p}{s}+1 \times \frac{h-f+2p}{s}+1 \times n_c$ by passing $n_c$ filters over regions of $f\times f \times c$ neighboring values in the input. $f$ is the filter size and $n_c$ is the number of filters. The stride $s$ defines the distance that the region is shifted for every step horizontally and vertically. The input is often padded with $p$ rows / columns of zeros on either side to avoid border artifacts. For this project we use \emph{same} padding, so that the output is always of size $\frac{w}{s}\times \frac{h}{s} \times n_c$.
+Instead of fully connected layers, convolutional layers can be used to process images or other spatially connected inputs. Each convolutional layer takes an input of size $w\times h \times c$ and generates an output of size $$\frac{w-f+2p}{s}+1 \times \frac{h-f+2p}{s}+1 \times n_c$$ by passing $n_c$ filters over regions of $f\times f \times c$ neighboring values in the input. $f$ is the filter size and $n_c$ is the number of filters. The stride $s$ defines the distance that the region is shifted for every step horizontally and vertically. The input is often padded with $p$ rows / columns of zeros on either side to avoid border artifacts. For this project we use \emph{same} padding, so that the output is always of size $$\frac{w}{s}\times \frac{h}{s} \times n_c.$$
 
 We use a convolutional neural net that is focused on the central region of the input as shown in figure \ref{fig:centre-net}.
 \begin{figure}

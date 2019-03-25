@@ -1,4 +1,5 @@
 %!TEX root = ../bomberchamp.tex
 
-We're only selecting from valid actions, since we found that otherwise the invalid actions can cause a lot of trouble. (essentially invalid actions are equal to WAIT, meaning that the rewards for different actions get mixed up)
-Another solution would've been to penalize invalid actions and let the agent learn to avoid them, but since filtering out invalid action is really easy and fast, we use that.
+We are only selecting from valid actions, since we found that otherwise the invalid actions can cause a lot of trouble. Essentially invalid actions are equal to WAIT, meaning that the rewards for different actions get mixed up.
+Another solution would have been to penalize invalid actions and let the agent learn to avoid them, but since filtering out invalid action is really easy and fast, we use that.
+Invalid actions include placing a bomb when the agent does not have a bomb and movements to tiles with walls, crates, agents and bombs. During training movement into explosions is allowed, but during play this is prevented.
