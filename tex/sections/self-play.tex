@@ -1,4 +1,11 @@
 %!TEX root = ../bomberchamp.tex
 
-We use self-play to train the agent in a four player free-for-all environment. The agent plays against itself, a past version of itself or the heuristic \emph{simple\_agent}. Since the players use the same model, the experiences for the current players can be saved in a shared experience replay buffer. The \emph{simple\_agent} experiences also get saved in the buffer with the $Q$ value estimation being calculated with the current player model. The past versions only serve as opponents with no data added to the buffer.
+We use self-play to train the agent in a four player free-for-all environment. The agent plays against itself, a past version of itself or the heuristic \emph{simple\_agent}. Since the players use the same model, the experiences for the player copies can be saved in a shared experience replay buffer. The \emph{simple\_agent} experience also gets saved in the buffer with the $Q$ value estimation being calculated using the current player model. The past versions only serve as opponents with no data added to the buffer.
 
+For each multi-player game, we take the original agent and select the other three agents randomly from the copies, past selves and \emph{simple\_agents}. The agent also plays a certain percentage of the games solo, as we found that this helps in keeping the agent movement efficient.
+
+Further, we randomize the game properties for each episode during training. A percentage of games is played on the coin variant with crate density $\rho_{crates}=0$ and maximum game duration $T_{max}\in\left[100,200\right]$. The rest of the games is played with $\rho_{crates}\in\left[0.5, 1\right]$ and $T_{max}\in\left[200,400\right]$. This randomization is done for robustness, so that the agent does not overfit to the exact game properties.
+
+The agent reward is postprocessed by subtracting the average reward of its opponents. This leads to the agent actually learning to beat the oppenents instead of just collecting points and allowing the others to do the same. It encourages the agent to play better than its opponents.
+
+The self-play strategy was heavily inspired by OpenAI Five\cite{OpenAI_dota}. Playing against past versions helps prevent "strategy collapse" which we also noticed during early versions. Randomization helps exploration of the strategy space. Subtracting average reward of opponents helps prevent positive-sum strategies.

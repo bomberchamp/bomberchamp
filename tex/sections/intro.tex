@@ -3,4 +3,6 @@ This semesters project for the lecture "Fundamentals of Machine Learning" consis
 Hereby the agent needs to kill opponents and collect coins. To make this possible it has to place bombs strategically in order to destroy crates and opponents. Some of the crates contain coins which the agent can collect as soon as the crates are destroyed.
 The agent is placed in one of the four corners of a maze-like environment with opponents in the other corners.
 During the following 400 time steps it has to gain more points than the other agents through fighting and collecting points.
-For this project we implemented the Rainbow DQN\cite{Hessel2018RainbowCI}, a Deep Q Network that includes a variety of extensions to improve its performance, with the exception of the distributional extension.
+For this project we implemented the Rainbow DQN\cite{Hessel2018RainbowCI}, a Deep Q Network that includes a variety of extensions to improve its performance, with the exception of the distributional extension. After solving the singleplayer tasks, we employ a self-play strategy inspired by OpenAI Five\cite{OpenAI_dota}.
+
+The implementation can be found at $$\text{\url{https://github.com/bomberchamp/bomberchamp}}.$$

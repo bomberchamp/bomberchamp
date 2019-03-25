@@ -52,7 +52,7 @@
 % inside general seciton about input space \subsection{Centring of agent} % j / a
 \subsection{Invalid actions} % 
 \input{sections/invalid-actions}
-\subsection{Auxilliary Reward Design}
+\subsection{Auxiliary Reward Design}
 \input{sections/aux-rewards}
 \subsection{Minigames} % j
 \input{sections/minigame}
@@ -64,22 +64,15 @@
 \subsection{Network Architecture}
 \input{sections/network-arch}
 
-\subsection{It does not work}
-% nothing works
-% solution: make it better
-\subsection{Network scaling} % j
-% different networks from minigame to full game
-% lots of graphs
-
 \begin{figure}
   \centering
   \includesvg{images/network-arch}
   \caption{Network architecture}
 \end{figure}
-% our learning process
 
 
 \section{Summary and Improvements}
+\input{sections/summary}
 % improvements: distributional DQN, train for 3 months
 % steps/own bomb in feature space
 % RNN (or other things able to capture hidden state), hidden states: time until next bomb of agents, who owns which bomb
@@ -89,23 +82,6 @@
 % -- currently main.py, settings.py and possibly callbacks.py has to be changed for a simple switch between train and test mode
 % -- separate rendering and environment, so that the environment can be called from e.g. a jupyter notebook
 % -- provide main.py or python notebook 
-
-
-
-
-
-\section{Model}
-
-
-
-\section{Training process}
-
-\subsection{Self play}
-%TODO how was it implemented etc
-For training purposes a simple agent implementation that follows the rules of bomberman and plays reasonably well was provided.
-To exploit this we wanted to first train our agent by classifying inputs generated with the simple agents. %TODO why didn't this work?
-This is why we implemented a self play strategy. This was also useful, as we could then use google colab and train more than one agent at the same time while using the same neural network.
-
 
 
 \printbibliography
