@@ -1,1 +1,25 @@
 %!TEX root = ../bomberchamp.tex
+
+As regression model we use a neural network, consisting of multiple layers of fully connected and convolutional layers. A fully connected layer can be represented as
+\begin{equation}
+y = w x+b,
+\end{equation}
+where $w$ and $b$ are learned through backpropagation. By stacking multiple of these layers and separating them with an activation function, e.g. the rectified linear unit
+\begin{equation}
+\phi_{relu}(y) = \begin{cases}
+y & y > 0 \\
+0 & otherwise,
+\end{cases}
+\end{equation}
+more complex functions can be approximated.
+
+Instead of fully connected layers, convolutional layers can be used to process images or other spatially connected inputs. Each convolutional layer takes an input of size $w\times h \times c$ and generates an output of size $\frac{w-f+2p}{s}+1 \times \frac{h-f+2p}{s}+1 \times n_c$ by passing $n_c$ filters over regions of $f\times f \times c$ neighboring values in the input. $f$ is the filter size and $n_c$ is the number of filters. The stride $s$ defines the distance that the region is shifted for every step horizontally and vertically. The input is often padded with $p$ rows / columns of zeros on either side to avoid border artifacts. For this project we use \emph{same} padding, so that the output is always of size $\frac{w}{s}\times \frac{h}{s} \times n_c$.
+
+We use a convolutional neural net that is focused on the central region of the input as shown in figure \ref{fig:centre-net}.
+\begin{figure}
+  \centering
+  \includesvg{images/network-arch}
+  \caption{Convolutional network focused on the central region.}
+  \label{fig:centre-net}
+\end{figure}
+The input layer gets separated into streams $a$, $b$ and $c$, each taking a centred cropping of the input. Each stream then processes the croppings through a number of convolutional layers depending on the size of the cropping. The results get flattened and concatenated after which they are passed on to the value and advantage streams further described in \ref{ch:duelling}.

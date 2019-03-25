@@ -1,0 +1,32 @@
+%!TEX root = ../../bomberchamp.tex
+
+\begin{figure}
+  \centering
+	\begin{tabular}{l l l l | l l l l | l l l l}
+		\multicolumn{12}{c}{Shared network} \\
+		\midrule
+		\multicolumn{4}{c|}{$a$ stream} & \multicolumn{4}{c|}{$b$ stream} & \multicolumn{4}{c}{$c$ stream} \\
+		\midrule
+		\multicolumn{4}{c|}{Cropping2D  14} & \multicolumn{4}{c|}{Cropping2D  10} & \multicolumn{4}{c}{} \\
+		\midrule
+		& $n_c$ & $f$ & $s$ & & $n_c$ & $f$ & $s$ & & $n_c$ & $f$ & $s$ \\
+		\midrule
+		Conv2D & 64 & 3 & 1 & Conv2D & 64 & 3 & 1 &  Conv2D & 32 & 1 & 1 \\
+		 &  &  &  &           Conv2D & 64 & 3 & 2 &  Conv2D & 64 & 4 & 2 \\
+		 &  &  &  &                  &    &   &   &  Conv2D & 64 & 3 & 2 \\
+		 &  &  &  &                  &    &   &   & MaxPool &    &   & 2 \\
+		 &  &  &  &                  &    &   &   &  Conv2D & 64 & 3 & 1 \\
+		\toprule
+	\end{tabular}
+	\begin{tabular}{l l l | l l l}
+		\multicolumn{3}{c|}{Advantage stream} & \multicolumn{3}{c}{Value stream} \\
+		\toprule
+		& units & & & units & \\
+		\midrule
+		NoisyDense & 512 & relu & NoisyDense & 512 & relu \\
+		NoisyDense & $D$ & relu & NoisyDense & 1 & relu \\
+		\toprule
+	\end{tabular}
+	\caption{Convolutional net focused on central region as shown in figure \ref{fig:centre-net}. Each convolutional layer is followed by a \emph{relu} activation.}
+	\label{fig:conv-original}
+\end{figure}

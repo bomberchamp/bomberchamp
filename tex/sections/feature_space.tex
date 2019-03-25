@@ -25,7 +25,7 @@ $$X_{x,y}|_{c=self/others}=\begin{cases}
 0 & \text{otherwise.}
 \end{cases}
 $$
-There is no differentiation between the different opponents in \emph{others}, since the state only consists of the current time step. The channel \emph{self} gets omitted when we later center the inputs.
+There is no differentiation between the different opponents in \emph{others}, since the state only consists of the current time step. The channel \emph{self} gets omitted when we later centre the inputs.
 
 For bombs $(x, y, t)$, $t$ being the time left until the bomb explodes, we calculate $$X_{x, y}|_{c=\text{bombs}} = 1 - \frac{t}{\mathrm{bombtimer}+1} \;\;\forall (x, y, t) \in \text{bombs}$$ with $$X_{x, y}|_{c=\text{bombs}}=0 \;\;\forall (x, y, t\geq0) \notin \text{bombs}.$$
 So with $\text{bombtimer}=4$, if $X_{x, y}|_{c=\text{bombs}} = 0.2$, the bomb has just been planted, and if $X_{x, y}|_{c=\text{bombs}} = 1$, the bomb will explode this turn.

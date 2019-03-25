@@ -38,7 +38,7 @@ To guarantee this, we implemented a sum tree to store the data, where searching 
 A sum tree is a binary tree, in which the parent node values are the sum of the child node values. In our sum tree, the transition priorities were saved in the leave nodes. Therefore the root holds the total priority. An array was used to hold the associated data values to the priorities. For the purpose of sampling the total priority is divided into k priority ranges, with k being the number of experiences in one sample.
 From each of these priority ranges one value is sampled uniformly and its corresponding leave node is searched. The data belonging to this priority is than used for the sample.
 
-\subsection{Duelling networks}
+\subsection{Duelling networks}\label{ch:duelling}
 The idea behind duelling networks \cite{DBLP:journals/corr/WangFL15} is, that for some states only the state-value function is important while for others the chosen action is crucial. \\
 Consider a small toy problem: Our agent needs to catch coins which are falling down form above, he can either move right or left or wait to catch them. In some states there are no coins at all. In that state it is not important which action is chosen, whereas for other states its is.
 \begin{figure}
