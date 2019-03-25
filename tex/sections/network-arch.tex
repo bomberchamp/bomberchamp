@@ -12,5 +12,5 @@ So for our modified convolutional net, we set the filter size $f$ and stride $s$
 \input{sections/figs/conv-focused-arch}
 \input{sections/figs/networks-on-full-coin-game}
 
-
-
+After testing the modified convolutional net on the minigame and the singleplayer bomberman coin collection, we found that it does not train well for $\gamma=0.99$ as can be seen in figure \ref{fig:fullcoins-conv-mod}. So we designed a network that can better handle the feature space and maze structure and is more robust to changes in $\gamma$. So we designed the focused net as shown in figure \ref{fig:centre-net}. This network architecture works very well as seen in figure \ref{fig:conv-focus} and has continued to work for the singleplayer bomberman mode \ref{fig:fullcrate} and also the multiplayer game.
+\input{sections/figs/networks-fullcrate}
