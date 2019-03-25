@@ -1,5 +1,5 @@
 %!TEX root = ./bomberchamp.tex
-\subsection{Q-learning}
+\subsection{Q-learning\anna}
 In Q-learning \cite{DBLP:journals/corr/HasseltGS15} instead of the state-values, Q-values are being used. They are defined as the current reward depending on the chosen action and the discounted future rewards under the premise of always using the policy $\pi$ for further decision making after the initial action choice:
 \begin{equation}
 Q_\pi(s,a)=\mathbb{E}\left[R\right]|_{a,s,\pi}.
@@ -16,7 +16,7 @@ after each action via:
 This makes it an off-policy algorithm, as the optimal $Q$-value: $Q^*$ is approximated by $Q$ directly (regardless of the followed policy) in contrast to for example SARSA. The policy is still important as it determines, which state-action pairs are used to update the model \cite{Sutton:1998:IRL:551283}. 
 Q-learning is also a model free approach, as it doesn't make a model of the environment but instead directly estimates $Q^*$.\\
 %In our case with bomberman, the problem is fully observable, meaning that the agent knows the entire state of the environment at every step of the game.
-\subsection{Q-Networks}
+\subsection{Q-Networks\anna}
 For some reinforcement learning problems, the simplest implementation of the Q-learning algorithm, a table is perfectly sufficient to find a good policy.
 If we consider more complicated problems with bigger inputs other methods are needed. For state of the art reinforcement learning, usually neural networks are being used.
 They are especially convenient as they are trained from raw inputs, which makes handcrafted features redundant \cite{DBLP:journals/corr/MnihKSGAWR13}.
@@ -28,7 +28,7 @@ L_{t}\left(\theta_{t}\right)=\mathbb{E}_{s, a \sim \rho(s,a)}\left[\left(Y_{t}^{
 \end{equation}
 %TODO Erwartungswert großschreiben
 is used, where $\rho(s, a)$ is a probability distribution over states and actions. To make this compatible with the Q-learning algorithm, the weights need to be updated at every step and the expectations exchanged with samples from the probability distribution $\rho(s,a)$.
-\subsection{DQN}
+\subsection{DQN\anna}
 Deep Q-networks \cite{DBLP:journals/corr/MnihKSGAWR13} are multilayered neural networks which make use of the Q-learning algorithm. The two mayor improvements of the model are the use of two separate networks and an experience buffer.
 The two networks are called online network and target network. The target network is used to calculate the targets $Y_{t}^{\mathrm{DQN}}$. It has the same structure as the online network but to make learning more stable, the weights of the target network $\theta_t^-$ stay constant for a longer time. 
 They are being copied from the online network every $\tau$ steps.

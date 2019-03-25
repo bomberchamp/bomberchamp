@@ -5,7 +5,7 @@ Interestingly the agent does learn to destroy crates and collect coins pretty we
 
 With a penalty for death, the agent learns to avoid death by choosing WAIT. When penalizing this action, the resulting agent learns to destroy the crates and collect coins, but after training for a long time it learns to alternate UP-DOWN and RIGHT-LEFT as a more elaborate version of WAIT to avoid death.
 
-So we chose to give a reward of $-0.2$ for WAIT and track the last moves $m_{t-k} = (x_{t-k}, y_{t-k}, a_{t-k})$ for $k=1,\dots,20$. The agent gets then penalized for the number of moves that are similar to the current move with
+So we chose to give a reward of $-0.2$ for WAIT and track the last moves $m_{t-k} = (x_{t-k}, y_{t-k}, a_{t-k})$ for $k=1,\dots,20$. The agent then gets penalized for the number of moves that are similar to the current move with
 $$
 R_{\text{similar\_moves}} = - \frac{1}{20} \sum_{k=1}^{20} (m_t = m_{t-k} \rightarrow 1) \land(m_t \neq m_{t-k} \rightarrow 0).
 $$

@@ -9,28 +9,33 @@
 \usepackage[backend=biber]{biblatex}
 \usepackage{amssymb}
 \usepackage{booktabs}
+\usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{subcaption}
 \newsavebox{\largestimage}
 
 \bibliography{literature.bib}
-\title{Machine Learning: Final project bomberchamp}
-\date{today}
+\title{Machine Learning: Final project \emph{bomberchamp}}
+\author{Johannes Vogt\and Anna Sterzik}
+\date{25.03.2019}
 \begin{document}
+\maketitle
 
 
+\def\anna{\\\small{\textcolor{gray}{Anna Sterzik}}}
+\def\johannes{\\\small{\textcolor{gray}{Johannes Vogt}}}
+\def\both{\\\small{\textcolor{gray}{Anna Sterzik, Johannes Vogt}}}
 
 
-
-\section{Introduction}
+\section{Introduction\both}
 % Introduction
 \input{sections/intro}
 % we implemented a rainbow dqn
 
-\subsection{Reinforcement Learning}
+\subsection{Reinforcement Learning\anna}
 \input{rlintro}
 % Reinforcement Learning basics a
-\subsection{Neural Networks}
+\subsection{Neural Networks\johannes}
 \input{sections/neural_net}
 % basics j
 
@@ -40,33 +45,33 @@
 
 \section{Rainbow / DQN Extensions}
 \input{DQN_extensions}
-\subsection{Multi-Step Learning} % j
+\subsection{Multi-Step Learning\johannes} % j
 % 
 \input{sections/multi-step}
 
 \section{Training}
-\subsection{Feature space}
+\subsection{Feature space\johannes}
 \input{sections/feature_space}
-\subsection{Augmented data}   %a
+\subsection{Augmented data\anna}   %a
 \input{augmented}
 % inside general seciton about input space \subsection{Centring of agent} % j / a
-\subsection{Invalid actions} % 
+\subsection{Invalid actions\johannes} % 
 \input{sections/invalid-actions}
-\subsection{Auxiliary Reward Design}
+\subsection{Auxiliary Reward Design\johannes}
 \input{sections/aux-rewards}
-\subsection{Minigames} % j
+\subsection{Minigames\johannes} % j
 \input{sections/minigame}
-\subsection{Self-Play} % j
+\subsection{Self-Play\johannes} % j
 \input{sections/self-play}
 
 
 \section{Observations}
-\subsection{Network Architecture}
+\subsection{Network Architecture\johannes}
 \input{sections/network-arch}
 
 
 
-\section{Summary and Improvements}
+\section{Summary and Improvements\johannes}
 \input{sections/summary}
 % improvements: distributional DQN, train for 3 months
 % steps/own bomb in feature space

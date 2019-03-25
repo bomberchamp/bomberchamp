@@ -1,16 +1,16 @@
 %!TEX root = ../bomberchamp.tex
 
 Having introduced our minigame in \ref{ch:minigame}, we tried different network architectures to see what is necessary for an arena of size $(17, 17)$.
+\input{sections/figs/dense-arch}
+\input{sections/figs/conv-arch}
 We chose a simple fully connected network with different numbers of neurons (Figure \ref{fig:dense-arch}) for our first tests and expanded on it with the convolutional network that was used on the Atari 2600 benchmark in the Rainbow DQN paper\cite{Hessel2018RainbowCI} (Figure \ref{fig:conv-original}). Since the input for the Atari benchmark was raw pixels with $w=h=84$, this might not be suitable for our problem with meaningful inputs of size $w=h=17$. So we modified the convolutional network to mimick the dimensions of the different layers of the original (Figure \ref{fig:conv-modified}).
+\input{sections/figs/networks-on-minigame}
 
 Figure \ref{fig:networks} shows the performance of the agents on different arena sizes of the minigame. While the dense networks (\ref{fig:network-dense64}, \ref{fig:network-dense256}) learn very quickly for small boards, they have difficulties capturing boards of size $w=h\geq10$. When trying the convolutional network designed for Atari games (\ref{fig:network-conv843}), its performance is even worse than the dense networks. This is likely due to the first convolutional layer having a filter size of $8$ and a stride of $4$. For raw pixels sparse with information, a high filter size and stride can help summarize the information and reduce the dimensions. But on our input it may lead to weakening the important values.
 So for our modified convolutional net, we set the filter size $f$ and stride $s$ to $1$. The resulting $17\times17$ layer output is close to the originals $21\times21$ layer output, making the remaining network usable. For the minigame, a layer with $f=1$, $s=1$ has no impact because there is only one input channel. But our bomberman input has six channels, so the first layer can transform the information at each location into a more convinient form. The result can be seen in figure \ref{fig:network-conv143}, as it can collect coins efficiently for at least $w=h=10$ after a short while. If trained longer, this network can also solve the minigame for $w=h=17$.
 
-\input{sections/figs/networks-on-minigame}
-
-\input{sections/figs/dense-arch}
-\input{sections/figs/conv-arch}
-
+\input{sections/figs/conv-focused-arch}
 \input{sections/figs/networks-on-full-coin-game}
 
-\input{sections/figs/conv-focused-arch}
+
+

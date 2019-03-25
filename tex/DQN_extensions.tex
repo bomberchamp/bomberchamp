@@ -1,4 +1,4 @@
-\subsection{Double DQN}
+\subsection{Double DQN\anna}
 Q-learning  and DQN tend to learn overestimated action values. During the maximization over the action choices, values are rather over than underestimated.
 This isn't necessarily a problem if they are uniformly overestimated or if interesting experiences are overestimated. However, in DQN overestimations differ for different actions and states. Combined with bootstrapping, this results in the propagation of wrong values and thus to worse policies \cite{DBLP:journals/corr/HasseltGS15}. To reduce those overestimations, the Double Q-learning algorithm \cite{DBLP:journals/corr/HasseltGS15} is used. 
 The main idea of the Double Q-learning algorithm is to decouple value selection and evaluation.
@@ -10,7 +10,7 @@ Updating double DQNs is similar to updating DQNs when the target is rewritten as
 Y_{t}^{\text { Double DQN }} \equiv R_{t+1}+\gamma Q\left(s_{t+1}, \underset{a}{\operatorname{argmax}}\; Q\left(s_{t+1}, a ; \theta_{t}\right); \theta_{t}^{-}\right).
 \end{equation}
 $\theta_{t}^{-}$ and $\theta_{t}$ are the weights of the target and online network respectively.
-\subsection{Prioritized Experience Replay}
+\subsection{Prioritized Experience Replay\anna}
 In standard experience replay, the agent is forced to pick experiences uniformly from all experiences in its memory. Therefore all experiences are sampled with the same frequency that they were originally encountered.
 This is not necessarily good for the learning process, as some experiences might not hold any valuable information for the agent but occur very often while other rare situations could be crucial for learning. \\
 This can be improved by prioritized experience replay \cite{DBLP:journals/corr/SchaulQAS15}. Here every experience in the buffer gets a priority according to its TD-error.
@@ -38,7 +38,7 @@ To guarantee this, we implemented a sum tree to store the data, where searching 
 A sum tree is a binary tree, in which the parent node values are the sum of the child node values. In our sum tree, the transition priorities were saved in the leave nodes. Therefore the root holds the total priority. An array was used to hold the associated data values to the priorities. For the purpose of sampling the total priority is divided into k priority ranges, with k being the number of experiences in one sample.
 From each of these priority ranges one value is sampled uniformly and its corresponding leave node is searched. The data belonging to this priority is than used for the sample.
 
-\subsection{Duelling networks}\label{ch:duelling}
+\subsection{Duelling networks\anna}\label{ch:duelling}
 The idea behind duelling networks \cite{DBLP:journals/corr/WangFL15} is, that for some states only the state-value function is important while for others the chosen action is crucial. \\
 Consider a small toy problem: Our agent needs to catch coins which are falling down form above, he can either move right or left or wait to catch them. In some states there are no coins at all. In that state it is not important which action is chosen, whereas for other states its is.
 \begin{figure}
@@ -59,7 +59,7 @@ It is better to calculate Q by
 Q(s, a ; \theta, \alpha, \beta)=V(s ; \theta, \beta)+ \left(A(s, a ; \theta, \alpha)-\frac{1}{|\mathcal{A}|} \sum_{a^{\prime}} A\left(s, a^{\prime} ; \theta, \alpha\right)\right),
 \end{equation}
 where A and V keep their identifiability and the optimization becomes more stable \cite{DBLP:journals/corr/WangFL15}.
-\subsection{Noisy Networks}
+\subsection{Noisy Networks\anna}
 So far we did use an $\epsilon$-greedy policy for exploration. Another technique which has been found to produce better result for many of the Atari games are Noisy Nets \cite{DBLP:journals/corr/FortunatoAPMOGM17}. They add parametric noise to the weights and thus aid exploration without the need to pick random actions as part of a policy (e.g. $\epsilon$-greedy). This is very convenient, because there is no need to tune additional hyper parameters as the reinforcement learning algorithm tunes the weights automatically.
 Consider a neural network $y=f_{\theta_n}(x)$. Where $\theta_n$ are the noisy weights. A linear layer of a neural network can be written as: 
 \begin{equation}

@@ -1,4 +1,15 @@
 %!TEX root = ../bomberchamp.tex
 
 
-Having different agents play with different auxilliary rewards, like the tendencies recently introduced in AlphaStar\cite{alphastarblog} where every agent has its own personal objective. But this would require a suitable skill evaluation metric and matchmaking for a four player game, which we did not have time for in the end.
+It was quite difficult to get started, implementing the agent to train even the simplest task. It can be unclear at times whether the agent does not learn due to a bug or simply due to bad hyperparameters or an unfit network architecture. But once the task of collecting coins was solved, the next tasks followed soon after. As it turns out, the results can be good even if there are still some serious bugs. During most of our self-play runs the agent only saw a bomb the second turn after it was planted.\\
+Neural networks themselves already have a good number of hyperparameters to tune. Reinforcement learning also adds some and once self-play is factored in, there are a lot of possibilities. We found that the agent is quite sensible to auxiliary rewards.
+
+In the end, we did not beat the \emph{simple\_agent} consistently, but the final agent is able to destroy crates, collect coins and also bomb an opponent from time to time.
+
+
+Improvements:
+\begin{itemize}
+\item{Tuning hyperparameters and adjusting the neural network. As we did not have a lot of time or resources during the final stretch, we did not test alternative network configurations and only a few hyperparameters. This would likely improve the agent quite a bit.}
+\item{The current network has a large concatenated flattened layer before the advantage and value streams. So most of the parameters (11.8M / 11.96M) are concentrated there. This seems very inefficient computationally and could probably be reduced by a lot, helping the agent act faster and avoid the $-1$ penalty for being the slowest agent. It would also help reduce the size of the weights.}
+\item{Having different agents play with different auxilliary rewards, like the tendencies recently introduced in AlphaStar\cite{alphastarblog} where every agent has its own personal objective. This would require a suitable skill evaluation metric and matchmaking for a four player game, which we did not have time for in the end.}
+\end{itemize}
