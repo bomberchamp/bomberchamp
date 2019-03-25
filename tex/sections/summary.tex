@@ -1,15 +1,33 @@
 %!TEX root = ../bomberchamp.tex
 
 
-It was quite difficult to get started, implementing the agent to train even the simplest task. It can be unclear at times whether the agent does not learn due to a bug or simply due to bad hyperparameters or an unfit network architecture. But once the task of collecting coins was solved, the next tasks followed soon after. As it turns out, the results can be good even if there are still some serious bugs. During most of our self-play runs the agent only saw a bomb the second turn after it was planted.\\
+It was quite difficult to get started, implementing the agent to train even the simplest task. It can be unclear at times, especially with a complex agent such as Rainbow DQN, whether the agent does not learn due to a bug or simply due to bad hyperparameters or an unfit network architecture. But once the task of collecting coins was solved, the next tasks followed soon after. As it turns out, the results can be good even if there are still some serious bugs. During most of our self-play runs the agent only saw a bomb the second turn after it was planted.\\
 Neural networks themselves already have a good number of hyperparameters to tune. Reinforcement learning also adds some and once self-play is factored in, there are a lot of possibilities. We found that the agent is quite sensible to auxiliary rewards.
 
 In the end, we did not beat the \emph{simple\_agent} consistently, but the final agent is able to destroy crates, collect coins and also bomb an opponent from time to time.
 
+\subsection{Improvements\johannes}
 
-Improvements:
+There are a number of points likely to increase the agents performance:
 \begin{itemize}
 \item{Tuning hyperparameters and adjusting the neural network. As we did not have a lot of time or resources during the final stretch, we did not test alternative network configurations and only a few hyperparameters. This would likely improve the agent quite a bit.}
 \item{The current network has a large concatenated flattened layer before the advantage and value streams. So most of the parameters (11.8M / 11.96M) are concentrated there. This seems very inefficient computationally and could probably be reduced by a lot, helping the agent act faster and avoid the $-1$ penalty for being the slowest agent. It would also help reduce the size of the weights.}
 \item{Having different agents play with different auxilliary rewards, like the tendencies recently introduced in AlphaStar\cite{alphastarblog} where every agent has its own personal objective. This would require a suitable skill evaluation metric and matchmaking for a four player game, which we did not have time for in the end.}
+\item{The agent currently has no information of what happened in previous time steps. While bomberman is a game with full information, the concrete timer of when bombs are available for agents is currently a hidden state and the expected actions are still sequences. So using a recurrent neural network might be useful, but it is difficult to combine with a replay buffer.}
+\item{We did not implement the distributional extension of Rainbow DQN. This could improve the performance, but in the Rainbow paper\cite{Hessel2018RainbowCI} it seemed to be only helpful after the agent has already trained for some time and surpassed human performance.}
 \end{itemize}
+
+\subsection{Improvements for Game Setup\johannes}
+All in all the project was very cool and it motivated us to dive into reinforcement learning. \\
+But there are a few points which made things difficult to start:
+\begin{itemize}
+	\item{The provided framework is quite cumbersome to work with. While this may be true for many real world applications and it is necessary to work around it in those cases, for educational purposes it would probably be better to provide something easily usable to be able concentrate on the reinforcement learning task. Due to this, we reimplemented the environment ourselves.}
+	\begin{itemize}
+		\item{Currently main.py, settings.py and possibly callbacks.py have to be changed for a simple switch between train and test mode.}
+		\item{Separate rendering and environment so that the environment can be called from e.g. a jupyter notebook on a cloud service that provides free GPUs for training.}
+		\item{Provide a version without Multiprocessing. MP may be useful for the tournament, but it is difficult to work around when training, so essentially one has to reimplement the environment.}
+	\end{itemize}
+	\item{The task, even the simplest subtask, is quite difficult because of the large arena size and maze structure. Providing an even simpler game to get started would help guide the students to the bigger tasks, see our Minigame section.}
+	\item{If reinforcement learning is covered a bit earlier in the lecture and there are exercises for it, the final project can be made more difficult. As of now, it is probably too difficult if one has no previous knowledge of the field.}
+\end{itemize}
+That said, the project is motivating and was a lot of fun.
