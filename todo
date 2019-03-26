@@ -1,7 +1,0 @@
-- self-play
-- distributional
-
-- bericht
-
-
-model output is currently passed through relu -> negative rewards can't be captured. options: linear (possibly clipped) output; softmax and reward scaling to [0,1]

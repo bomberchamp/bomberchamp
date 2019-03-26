@@ -1,12 +1,13 @@
 FROM python:latest
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ffmpeg
+RUN apt-get install -y ffmpeg imagemagick
 
 RUN pip install -q numpy scipy sklearn
 RUN pip install -q pygame
 RUN pip install -q jupyter
 RUN pip install -q tf-nightly
+RUN pip install -q matplotlib
 
 WORKDIR /wd
 

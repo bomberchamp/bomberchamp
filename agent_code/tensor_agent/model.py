@@ -12,7 +12,6 @@ from tensorflow.keras import backend as K
 
 from agent_code.tensor_agent.hyperparameters import hp
 
-from agent_code.tensor_agent.loss import weighted_huber_loss, huber_loss
 from agent_code.tensor_agent.layers import NoisyDense, VAMerge
 
 from agent_code.tensor_agent.names import get_random_name
